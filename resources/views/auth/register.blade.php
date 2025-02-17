@@ -5,7 +5,7 @@
     <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <!-- Logo -->
         <div class="text-center mb-6">
-            <h1 class="text-3xl font-bold text-blue-600">Enhance</h1>
+            <h1 class="text-3xl font-bold text-blue-600">Flex Cv</h1>
             <p class="text-gray-600">Crie sua conta</p>
         </div>
 

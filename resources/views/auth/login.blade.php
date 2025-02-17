@@ -5,7 +5,7 @@
     <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <!-- Logo -->
         <div class="text-center mb-6">
-            <h1 class="text-3xl font-bold text-blue-600">Enhance</h1>
+            <h1 class="text-3xl font-bold text-blue-600">Flex Cv</h1>
             <p class="text-gray-600">Faça login para continuar</p>
         </div>
 
@@ -70,6 +70,11 @@
                 </button>
             </div>
 
+            <!-- Register Link -->
+            <div class="text-center mb-4">  <!-- Added a margin-bottom for spacing -->
+                <a href="{{ route('register') }}" class="text-blue-600 hover:underline">Não tem uma conta? Cadastre-se</a>
+            </div>
+
             <!-- Forgot Password Link -->
             <div class="text-center">
                 <a href="{{ route('password.request') }}" class="text-blue-600 hover:underline">Esqueceu sua senha?</a>
@@ -90,4 +95,4 @@
         </form>
     </div>
 </div>
-@endsection 
+@endsection

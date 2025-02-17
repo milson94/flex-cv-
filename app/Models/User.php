@@ -45,4 +45,11 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function isAdmin()
+    {
+        // Replace 'admin' with the actual condition to check for admin users
+        // This could be a role, a flag in the database, etc.
+        return $this->role === 'admin'; // Example condition
+    }
 }
