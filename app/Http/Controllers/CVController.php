@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\CV; // Assuming you have a CV model
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class CVController extends Controller
 {
@@ -62,86 +64,95 @@ class CVController extends Controller
     }
 
     public function preview(Request $request)
-{
-    // Store CV data in session
-    $cvData = [
-        'first_name' => $request->input('first_name'),
-        'last_name' => $request->input('last_name'),
-        'role' => $request->input('role'),
-        'email' => $request->input('email'),
-        'linkedin' => $request->input('linkedin'),
-        'location' => $request->input('location'),
-        'summary' => $request->input('summary'),
-        'place_of_birth' => $request->input('place_of_birth'),
-        'nationality' => $request->input('nationality'),
-        'phone_number' => $request->input('phone_number'),
-        'date_of_birth' => $request->input('date_of_birth'),
-        'gender' => $request->input('gender'),
-        'skills' => $request->input('skills'),
-    ];
+    {
+        // Store CV data in session
+        $cvData = [
+            'first_name' => $request->input('first_name'),
+            'last_name' => $request->input('last_name'),
+            'role' => $request->input('role'),
+            'email' => $request->input('email'),
+            'linkedin' => $request->input('linkedin'),
+            'location' => $request->input('location'),
+            'summary' => $request->input('summary'),
+            'place_of_birth' => $request->input('place_of_birth'),
+            'nationality' => $request->input('nationality'),
+            'phone_number' => $request->input('phone_number'),
+            'date_of_birth' => $request->input('date_of_birth'),
+            'gender' => $request->input('gender'),
+            'skills' => $request->input('skills'),
+        ];
 
-    // Experience
-    $companyNames = $request->input('company_name');
-    $titles = $request->input('title');
-    $descriptions = $request->input('company_description');
-    $achievements = $request->input('achievements');
-    $duties = $request->input('duties');
-    $startDates = $request->input('start_date');
-    $endDates = $request->input('end_date');
-    $currentStatuses = $request->input('current');
+        // Experience
+        $companyNames = $request->input('company_name');
+        $titles = $request->input('title');
+        $descriptions = $request->input('company_description');
+        $achievements = $request->input('achievements');
+        $duties = $request->input('duties');
+        $startDates = $request->input('start_date');
+        $endDates = $request->input('end_date');
+        $currentStatuses = $request->input('current');
 
-    if (is_array($companyNames) && is_array($titles) && is_array($descriptions) && is_array($achievements) && is_array($duties) && is_array($startDates) && is_array($endDates) && is_array($currentStatuses) &&
-        count($companyNames) == count($titles) && count($companyNames) == count($descriptions) &&
-        count($companyNames) == count($achievements) && count($companyNames) == count($duties) &&
-        count($companyNames) == count($startDates) && count($companyNames) == count($endDates) &&
-        count($companyNames) == count($currentStatuses)) {
-        $cvData['experiences'] = array_map(function ($company, $title, $description, $achievement, $duty, $startDate, $endDate, $current) {
-            return [
-                'company_name' => $company,
-                'title' => $title,
-                'company_description' => $description,
-                'achievements' => $achievement,
-                'duties' => $duty,
-                'start_date' => $startDate,
-                'end_date' => $endDate,
-                'current' => $current,
-            ];
-        }, $companyNames, $titles, $descriptions, $achievements, $duties, $startDates, $endDates, $currentStatuses);
-    } else {
-        $cvData['experiences'] = [];
+        if (is_array($companyNames) && is_array($titles) && is_array($descriptions) && is_array($achievements) && is_array($duties) && is_array($startDates) && is_array($endDates) && is_array($currentStatuses) &&
+            count($companyNames) == count($titles) && count($companyNames) == count($descriptions) &&
+            count($companyNames) == count($achievements) && count($companyNames) == count($duties) &&
+            count($companyNames) == count($startDates) && count($companyNames) == count($endDates) &&
+            count($companyNames) == count($currentStatuses)) {
+            $cvData['experiences'] = array_map(function ($company, $title, $description, $achievement, $duty, $startDate, $endDate, $current) {
+                return [
+                    'company_name' => $company,
+                    'title' => $title,
+                    'company_description' => $description,
+                    'achievements' => $achievement,
+                    'duties' => $duty,
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
+                    'current' => $current,
+                ];
+            }, $companyNames, $titles, $descriptions, $achievements, $duties, $startDates, $endDates, $currentStatuses);
+        } else {
+            $cvData['experiences'] = [];
+        }
+
+        // Education
+        $schools = $request->input('school');
+        $degrees = $request->input('degree');
+        $completionYears = $request->input('year_of_completion');
+
+        if (is_array($schools) && is_array($degrees) && is_array($completionYears) &&
+            count($schools) == count($degrees) && count($schools) == count($completionYears)) {
+            $cvData['educations'] = array_map(function ($school, $degree, $completionYear) {
+                return [
+                    'school' => $school,
+                    'degree' => $degree,
+                    'year_of_completion' => $completionYear,
+                ];
+            }, $schools, $degrees, $completionYears);
+        } else {
+            $cvData['educations'] = [];
+        }
+
+        $cvData['languages'] = $this->formatLanguages($request->all());
+        $cvData['additional_information'] = $request->input('additional_information');
+        $cvData['references'] = $this->formatReferences($request->all());
+
+        $request->session()->put('cv_data', $cvData);
+
+        // Redirect to template selection page
+        return redirect()->route('cv.templates');
     }
-
-    // Education
-    $schools = $request->input('school');
-    $degrees = $request->input('degree');
-    $completionYears = $request->input('year_of_completion');
-
-    if (is_array($schools) && is_array($degrees) && is_array($completionYears) &&
-        count($schools) == count($degrees) && count($schools) == count($completionYears)) {
-        $cvData['educations'] = array_map(function ($school, $degree, $completionYear) {
-            return [
-                'school' => $school,
-                'degree' => $degree,
-                'year_of_completion' => $completionYear,
-            ];
-        }, $schools, $degrees, $completionYears);
-    } else {
-        $cvData['educations'] = [];
-    }
-
-    $cvData['languages'] = $this->formatLanguages($request->all());
-    $cvData['additional_information'] = $request->input('additional_information');
-    $cvData['references'] = $this->formatReferences($request->all());
-
-    $request->session()->put('cv_data', $cvData);
-
-    // Redirect to template selection page
-    return redirect()->route('cv.templates');
-}
 
     public function templates()
     {
-        return view('cv_templates');
+        $templatePath = resource_path('views/cv_templates');
+        $templateFiles = File::files($templatePath);
+        $templates = [];
+
+        foreach ($templateFiles as $file) {
+            $templateName = pathinfo($file->getFilename(), PATHINFO_FILENAME); // Remove .blade.php extension
+            $templates[] = $templateName;
+        }
+
+        return view('cv_templates.cv_templates', compact('templates'));
     }
 
     public function store(Request $request)
