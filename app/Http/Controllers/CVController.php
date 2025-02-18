@@ -62,49 +62,82 @@ class CVController extends Controller
     }
 
     public function preview(Request $request)
-    {
-        // Store CV data in session
-        $request->session()->put('cv_data', [
-            'first_name' => $request->input('first_name'),
-            'last_name' => $request->input('last_name'),
-            'role' => $request->input('role'),
-            'email' => $request->input('email'),
-            'linkedin' => $request->input('linkedin'),
-            'location' => $request->input('location'),
-            'summary' => $request->input('summary'),
-            'place_of_birth' => $request->input('place_of_birth'),
-            'nationality' => $request->input('nationality'),
-            'phone_number' => $request->input('phone_number'),
-            'date_of_birth' => $request->input('date_of_birth'),
-            'gender' => $request->input('gender'),
-            'experiences' => $request->input('company_name') ? array_map(function ($company, $title, $description, $achievements, $duties, $start_date, $end_date, $current) {
-                return [
-                    'company_name' => $company,
-                    'title' => $title,
-                    'company_description' => $description,
-                    'achievements' => $achievements,
-                    'duties' => $duties,
-                    'start_date' => $start_date,
-                    'end_date' => $end_date,
-                    'current' => $current,
-                ];
-            }, $request->input('company_name'), $request->input('title'), $request->input('company_description'), $request->input('achievements'), $request->input('duties'), $request->input('start_date'), $request->input('end_date'), $request->input('current')) : [],
-            'educations' => $request->input('school') ? array_map(function ($school, $degree, $year_of_completion) {
-                return [
-                    'school' => $school,
-                    'degree' => $degree,
-                    'year_of_completion' => $year_of_completion,
-                ];
-            }, $request->input('school'), $request->input('degree'), $request->input('year_of_completion')) : [],
-            'languages' => $this->formatLanguages($request->all()),
-            'additional_information' => $request->input('additional_information'),
-            'references' => $this->formatReferences($request->all()),
-            'skills' => $request->input('skills'),
-        ]);
+{
+    // Store CV data in session
+    $cvData = [
+        'first_name' => $request->input('first_name'),
+        'last_name' => $request->input('last_name'),
+        'role' => $request->input('role'),
+        'email' => $request->input('email'),
+        'linkedin' => $request->input('linkedin'),
+        'location' => $request->input('location'),
+        'summary' => $request->input('summary'),
+        'place_of_birth' => $request->input('place_of_birth'),
+        'nationality' => $request->input('nationality'),
+        'phone_number' => $request->input('phone_number'),
+        'date_of_birth' => $request->input('date_of_birth'),
+        'gender' => $request->input('gender'),
+        'skills' => $request->input('skills'),
+    ];
 
-        // Redirect to template selection page
-        return redirect()->route('cv.templates');
+    // Experience
+    $companyNames = $request->input('company_name');
+    $titles = $request->input('title');
+    $descriptions = $request->input('company_description');
+    $achievements = $request->input('achievements');
+    $duties = $request->input('duties');
+    $startDates = $request->input('start_date');
+    $endDates = $request->input('end_date');
+    $currentStatuses = $request->input('current');
+
+    if (is_array($companyNames) && is_array($titles) && is_array($descriptions) && is_array($achievements) && is_array($duties) && is_array($startDates) && is_array($endDates) && is_array($currentStatuses) &&
+        count($companyNames) == count($titles) && count($companyNames) == count($descriptions) &&
+        count($companyNames) == count($achievements) && count($companyNames) == count($duties) &&
+        count($companyNames) == count($startDates) && count($companyNames) == count($endDates) &&
+        count($companyNames) == count($currentStatuses)) {
+        $cvData['experiences'] = array_map(function ($company, $title, $description, $achievement, $duty, $startDate, $endDate, $current) {
+            return [
+                'company_name' => $company,
+                'title' => $title,
+                'company_description' => $description,
+                'achievements' => $achievement,
+                'duties' => $duty,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'current' => $current,
+            ];
+        }, $companyNames, $titles, $descriptions, $achievements, $duties, $startDates, $endDates, $currentStatuses);
+    } else {
+        $cvData['experiences'] = [];
     }
+
+    // Education
+    $schools = $request->input('school');
+    $degrees = $request->input('degree');
+    $completionYears = $request->input('year_of_completion');
+
+    if (is_array($schools) && is_array($degrees) && is_array($completionYears) &&
+        count($schools) == count($degrees) && count($schools) == count($completionYears)) {
+        $cvData['educations'] = array_map(function ($school, $degree, $completionYear) {
+            return [
+                'school' => $school,
+                'degree' => $degree,
+                'year_of_completion' => $completionYear,
+            ];
+        }, $schools, $degrees, $completionYears);
+    } else {
+        $cvData['educations'] = [];
+    }
+
+    $cvData['languages'] = $this->formatLanguages($request->all());
+    $cvData['additional_information'] = $request->input('additional_information');
+    $cvData['references'] = $this->formatReferences($request->all());
+
+    $request->session()->put('cv_data', $cvData);
+
+    // Redirect to template selection page
+    return redirect()->route('cv.templates');
+}
 
     public function templates()
     {
