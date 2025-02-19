@@ -57,7 +57,7 @@ class CVController extends Controller
         ];
 
         // Load the selected template
-        $pdf = Pdf::loadView("cv_templates.$template", $data);
+        $pdf = Pdf::loadView("cv_templates." . str_replace('.blade', '', $template), $data);
 
         // Download the PDF
         return $pdf->download('cv.pdf');
@@ -152,7 +152,7 @@ class CVController extends Controller
             $templates[] = $templateName;
         }
 
-        return view('cv_templates.cv_templates', compact('templates'));
+        return view('cv_templates', compact('templates'));
     }
 
     public function store(Request $request)
