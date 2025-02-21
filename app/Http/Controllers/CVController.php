@@ -18,7 +18,7 @@ class CVController extends Controller
         // Retrieve CV data from the database (if available)
         $cv = CV::where('user_id', auth()->id())->latest()->first();
 
-        // If CV exists in the database, fetch experiences and educations
+        // If CV exists in the database, fetch related data
         if ($cv) {
             $experiences = $cv->experiences;
             $educations = $cv->educations;
@@ -80,60 +80,61 @@ class CVController extends Controller
             'date_of_birth' => $request->input('date_of_birth'),
             'gender' => $request->input('gender'),
             'skills' => $request->input('skills'),
+            'experiences' => [],
+            'educations' => [],
+            'languages' => [],
+            'additional_information' => $request->input('additional_information') ?? [],
+            'references' => [],
         ];
 
-        // Experience
-        $companyNames = $request->input('company_name');
-        $titles = $request->input('title');
-        $descriptions = $request->input('company_description');
-        $achievements = $request->input('achievements');
-        $duties = $request->input('duties');
-        $startDates = $request->input('start_date');
-        $endDates = $request->input('end_date');
-        $currentStatuses = $request->input('current');
-
-        if (is_array($companyNames) && is_array($titles) && is_array($descriptions) && is_array($achievements) && is_array($duties) && is_array($startDates) && is_array($endDates) && is_array($currentStatuses) &&
-            count($companyNames) == count($titles) && count($companyNames) == count($descriptions) &&
-            count($companyNames) == count($achievements) && count($companyNames) == count($duties) &&
-            count($companyNames) == count($startDates) && count($companyNames) == count($endDates) &&
-            count($companyNames) == count($currentStatuses)) {
-            $cvData['experiences'] = array_map(function ($company, $title, $description, $achievement, $duty, $startDate, $endDate, $current) {
-                return [
+        // Process experiences
+        if ($request->company_name) {
+            foreach ($request->company_name as $key => $company) {
+                $cvData['experiences'][] = [
                     'company_name' => $company,
-                    'title' => $title,
-                    'company_description' => $description,
-                    'achievements' => $achievement,
-                    'duties' => $duty,
-                    'start_date' => $startDate,
-                    'end_date' => $endDate,
-                    'current' => $current,
+                    'title' => $request->title[$key] ?? '',
+                    'start_date' => $request->start_date[$key] ?? '',
+                    'end_date' => $request->current[$key] ?? false ? '' : ($request->end_date[$key] ?? ''),
+                    'company_description' => $request->company_description[$key] ?? '',
+                    'achievements' => $request->achievements[$key] ?? '',
+                    'duties' => $request->duties[$key] ?? [], // Keep as array for multiple duties
                 ];
-            }, $companyNames, $titles, $descriptions, $achievements, $duties, $startDates, $endDates, $currentStatuses);
-        } else {
-            $cvData['experiences'] = [];
+            }
         }
 
-        // Education
-        $schools = $request->input('school');
-        $degrees = $request->input('degree');
-        $completionYears = $request->input('year_of_completion');
-
-        if (is_array($schools) && is_array($degrees) && is_array($completionYears) &&
-            count($schools) == count($degrees) && count($schools) == count($completionYears)) {
-            $cvData['educations'] = array_map(function ($school, $degree, $completionYear) {
-                return [
+        // Process educations
+        if ($request->school) {
+            foreach ($request->school as $key => $school) {
+                $cvData['educations'][] = [
                     'school' => $school,
-                    'degree' => $degree,
-                    'year_of_completion' => $completionYear,
+                    'degree' => $request->degree[$key] ?? '',
+                    'year_of_completion' => $request->year_of_completion[$key] ?? '',
                 ];
-            }, $schools, $degrees, $completionYears);
-        } else {
-            $cvData['educations'] = [];
+            }
         }
 
-        $cvData['languages'] = $this->formatLanguages($request->all());
-        $cvData['additional_information'] = $request->input('additional_information');
-        $cvData['references'] = $this->formatReferences($request->all());
+        // Process languages
+        if ($request->language) {
+            foreach ($request->language as $key => $lang) {
+                $cvData['languages'][] = [
+                    'language' => $lang,
+                    'speaking_level' => $request->speaking_level[$key] ?? '',
+                    'reading_level' => $request->reading_level[$key] ?? '',
+                    'writing_level' => $request->writing_level[$key] ?? '',
+                ];
+            }
+        }
+
+        // Process references
+        if ($request->reference_name) {
+            foreach ($request->reference_name as $key => $name) {
+                $cvData['references'][] = [
+                    'reference_name' => $name,
+                    'reference_position' => $request->reference_position[$key] ?? '',
+                    'reference_phone' => $request->reference_phone[$key] ?? '',
+                ];
+            }
+        }
 
         $request->session()->put('cv_data', $cvData);
 
@@ -148,7 +149,7 @@ class CVController extends Controller
         $templates = [];
 
         foreach ($templateFiles as $file) {
-            $templateName = pathinfo($file->getFilename(), PATHINFO_FILENAME); // Remove .blade.php extension
+            $templateName = pathinfo($file->getFilename(), PATHINFO_FILENAME);
             $templates[] = $templateName;
         }
 
@@ -219,12 +220,12 @@ class CVController extends Controller
             foreach ($validatedData['company_name'] as $index => $companyName) {
                 $cv->experiences()->create([
                     'company_name' => $companyName,
-                    'title' => $validatedData['title'][$index],
-                    'company_description' => $validatedData['company_description'][$index],
-                    'achievements' => $validatedData['achievements'][$index],
-                    'duties' => $validatedData['duties'][$index],
-                    'start_date' => $validatedData['start_date'][$index],
-                    'end_date' => $validatedData['end_date'][$index],
+                    'title' => $validatedData['title'][$index] ?? '',
+                    'company_description' => $validatedData['company_description'][$index] ?? '',
+                    'achievements' => $validatedData['achievements'][$index] ?? '',
+                    'duties' => $validatedData['duties'][$index] ?? [], // Store as array
+                    'start_date' => $validatedData['start_date'][$index] ?? '',
+                    'end_date' => $validatedData['current'][$index] ?? false ? null : ($validatedData['end_date'][$index] ?? ''),
                     'current' => $validatedData['current'][$index] ?? false,
                 ]);
             }
@@ -235,8 +236,8 @@ class CVController extends Controller
             foreach ($validatedData['school'] as $index => $school) {
                 $cv->educations()->create([
                     'school' => $school,
-                    'degree' => $validatedData['degree'][$index],
-                    'year_of_completion' => $validatedData['year_of_completion'][$index],
+                    'degree' => $validatedData['degree'][$index] ?? '',
+                    'year_of_completion' => $validatedData['year_of_completion'][$index] ?? '',
                 ]);
             }
         }
@@ -252,9 +253,9 @@ class CVController extends Controller
             foreach ($data['language'] as $index => $language) {
                 $languages[] = [
                     'language' => $language,
-                    'speaking_level' => $data['speaking_level'][$index],
-                    'reading_level' => $data['reading_level'][$index],
-                    'writing_level' => $data['writing_level'][$index],
+                    'speaking_level' => $data['speaking_level'][$index] ?? '',
+                    'reading_level' => $data['reading_level'][$index] ?? '',
+                    'writing_level' => $data['writing_level'][$index] ?? '',
                 ];
             }
         }
@@ -267,9 +268,9 @@ class CVController extends Controller
         if (!empty($data['reference_name'])) {
             foreach ($data['reference_name'] as $index => $name) {
                 $references[] = [
-                    'name' => $name,
-                    'position' => $data['reference_position'][$index],
-                    'phone' => $data['reference_phone'][$index],
+                    'reference_name' => $name,
+                    'reference_position' => $data['reference_position'][$index] ?? '',
+                    'reference_phone' => $data['reference_phone'][$index] ?? '',
                 ];
             }
         }
