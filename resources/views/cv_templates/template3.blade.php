@@ -13,118 +13,110 @@
         body {
             min-height: 100%;
             background: #fff;
-            font-family: 'Lato', sans-serif;
+            font-family: 'Roboto', sans-serif; /* Modern font: Roboto */
             font-weight: 400;
             color: #222;
-            font-size: 12px;
-            line-height: 16px;
+            font-size: 10px; /* Reduced font size to fit on one page */
+            line-height: 14px;
             padding: 0;
         }
         .cv-container {
             width: 100%;
-            max-width: 1000px;
+            max-width: 800px; /* Adjusted to match the image width */
             margin: 0 auto;
+            padding: 20px; /* Minimal padding for clean look */
             display: flex;
             justify-content: space-between;
-            border: 1px solid #ddd;
         }
         .left-column, .right-column {
             width: 48%;
-            padding: 20px; /* Basic, even padding for both columns */
         }
         .header {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            text-align: center;
         }
         .header h1 {
             font-size: 24px;
+            font-weight: bold;
             text-transform: uppercase;
             margin-bottom: 5px;
         }
-        .header .first-name {
-            font-weight: 700;
-        }
-        .header .last-name {
-            font-weight: 300;
-        }
-        .role {
-            font-size: 16px; /* Slightly larger for job position */
-            color: #2c3e50; /* Subtle color for role */
+        .contact-info {
             margin-bottom: 15px;
+            text-align: center;
         }
-        .contact-info, .summary, .section {
-            margin-bottom: 15px;
-        }
-        .contact-info p, .summary p {
-            margin: 3px 0;
-            font-size: 12px;
+        .contact-info p {
+            margin: 2px 0;
+            font-size: 10px;
             color: #555;
         }
+        .section {
+            margin-bottom: 15px;
+        }
         .section__title {
-            letter-spacing: 1px;
-            color: #54AFE4;
+            font-size: 14px;
             font-weight: bold;
             margin-bottom: 5px;
             text-transform: uppercase;
-            font-size: 14px;
+            color: #222;
         }
         .experience-item, .education-item, .reference-item {
             margin-bottom: 10px;
         }
         .experience-item h3, .education-item h3, .reference-item h3 {
-            font-size: 14px;
-            color: #2c3e50;
-            margin: 0;
-        }
-        .skills-list {
-            list-style: none; /* Remove bullet points */
-        }
-        .skills-list li {
-            margin-bottom: 5px; /* Each skill on its own line */
-            color: #555;
             font-size: 12px;
+            font-weight: bold;
+            color: #222;
+            margin: 0 0 5px 0;
         }
-        .language-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 5px;
+        .experience-item p, .education-item p, .reference-item p {
+            margin: 2px 0;
             font-size: 10px;
+            color: #555;
         }
-        .language-table th, .language-table td {
-            border: 1px solid #ddd;
-            padding: 4px;
-            text-align: left;
+        .skills-list, .languages-list {
+            list-style: none;
+            margin-bottom: 5px;
         }
-        .language-table th {
-            background-color: #f2f2f2;
+        .skills-list li, .languages-list li {
+            margin-bottom: 3px;
+            font-size: 10px;
+            color: #555;
+        }
+        .footer {
+            text-align: center;
+            font-size: 8px;
+            color: #777;
+            margin-top: 15px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+            width: 100%; /* Span across both columns */
         }
     </style>
-    <link href='https://fonts.googleapis.com/css?family=Lato:400,300,700' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+    <link href='https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap' rel='stylesheet' type='text/css'>
 </head>
 <body>
     <div class="cv-container">
-        <!-- Left Column: Personal Information -->
+        <!-- Left Column: Personal Data, Summary, Education -->
         <div class="left-column">
+            <!-- Header -->
             <div class="header">
-                <h1>
-                    <span class="first-name">{{ $first_name }}</span>
-                    <span class="last-name">{{ $last_name }}</span>
-                </h1>
+                <h1>{{ $first_name }} {{ $last_name }}</h1>
                 <p class="role">{{ $role }}</p>
             </div>
 
+            <!-- Contact Info -->
             <div class="contact-info">
-                <p><i class="fas fa-phone"></i> {{ $phone_number }}</p>
-                <p><i class="fas fa-envelope"></i> {{ $email }}</p>
-                <p><i class="fab fa-linkedin"></i> {{ $linkedin }}</p>
-                <p><i class="fas fa-map-marker-alt"></i> {{ $location }}</p>
-                <p><i class="fas fa-globe"></i> Nacionalidade: {{ $nationality }}</p>
-                <p><i class="fas fa-birthday-cake"></i> Data de Nascimento: {{ $date_of_birth }}</p>
-                <p><i class="fas fa-map-pin"></i> Local de Nascimento: {{ $place_of_birth }}</p>
-                <p><i class="fas fa-venus-mars"></i> Gênero: {{ $gender == 'male' ? 'Masculino' : ($gender == 'female' ? 'Feminino' : 'Outro') }}</p>
+                <p>{{ $email }} • {{ $linkedin }} • {{ $phone_number }}</p>
+                <p>{{ $location }}</p>
+                <p>Nacionalidade: {{ $nationality }}</p>
+                <p>Data de Nascimento: {{ $date_of_birth }}</p>
+                <p>Local de Nascimento: {{ $place_of_birth }}</p>
+                <p>Gênero: {{ $gender == 'male' ? 'Masculino' : ($gender == 'female' ? 'Feminino' : 'Outro') }}</p>
             </div>
 
-            <div class="section summary">
+            <!-- Summary -->
+            <div class="section">
                 <div class="section__title">Resumo</div>
                 <p>{{ $summary }}</p>
             </div>
@@ -136,15 +128,18 @@
                     @foreach ($educations as $education)
                         <div class="education-item">
                             <h3>{{ $education['degree'] }} - {{ $education['school'] }}</h3>
-                            <p><em>Ano de Conclusão: {{ $education['year_of_completion'] }}</em></p>
+                            <p>{{ $education['year_of_completion'] }}</p>
                         </div>
                     @endforeach
                 @else
                     <p>Sem educação adicionada.</p>
                 @endif
             </div>
+        </div>
 
-            <!-- Skills (each on its own line, no background) -->
+        <!-- Right Column: Skills, Languages, Experience, References, Additional Information -->
+        <div class="right-column">
+            <!-- Skills -->
             <div class="section">
                 <div class="section__title">Habilidades</div>
                 <ul class="skills-list">
@@ -157,32 +152,43 @@
                     @endif
                 </ul>
             </div>
-        </div>
 
-        <!-- Right Column: Professional Information -->
-        <div class="right-column">
             <!-- Languages -->
             <div class="section">
                 <div class="section__title">Idiomas</div>
-                @if (!empty($languages))
-                    <table class="language-table">
-                        <tr>
-                            <th>Idioma</th>
-                            <th>Conversação</th>
-                            <th>Leitura</th>
-                            <th>Escrita</th>
-                        </tr>
+                <ul class="languages-list">
+                    @if (!empty($languages))
                         @foreach ($languages as $language)
-                            <tr>
-                                <td>{{ $language['language'] }}</td>
-                                <td>{{ $language['speaking_level'] == 'basic' ? 'Básico' : ($language['speaking_level'] == 'good' ? 'Bom' : 'Fluente') }}</td>
-                                <td>{{ $language['reading_level'] == 'basic' ? 'Básico' : ($language['reading_level'] == 'good' ? 'Bom' : 'Fluente') }}</td>
-                                <td>{{ $language['writing_level'] == 'basic' ? 'Básico' : ($language['writing_level'] == 'good' ? 'Bom' : 'Fluente') }}</td>
-                            </tr>
+                            <li>{{ $language['language'] }} - Conversação: {{ $language['speaking_level'] == 'basic' ? 'Básico' : ($language['speaking_level'] == 'good' ? 'Bom' : 'Fluente') }}, Leitura: {{ $language['reading_level'] == 'basic' ? 'Básico' : ($language['reading_level'] == 'good' ? 'Bom' : 'Fluente') }}, Escrita: {{ $language['writing_level'] == 'basic' ? 'Básico' : ($language['writing_level'] == 'good' ? 'Bom' : 'Fluente') }}</li>
                         @endforeach
-                    </table>
+                    @else
+                        <p>Sem idiomas adicionados.</p>
+                    @endif
+                </ul>
+            </div>
+
+            <!-- Experience -->
+            <div class="section">
+                <div class="section__title">Experiência</div>
+                @if (!empty($experiences))
+                    @foreach ($experiences as $experience)
+                        <div class="experience-item">
+                            <h3>{{ $experience['title'] }} - {{ $experience['company_name'] }}</h3>
+                            <p>{{ $experience['start_date'] }} - {{ $experience['end_date'] ?: 'Atual' }}</p>
+                            @if (!empty($experience['company_description']))
+                                <p>Descrição da Empresa: {{ $experience['company_description'] }}</p>
+                            @endif
+                            @if (!empty($experience['achievements']))
+                                <p>Conquistas: {{ $experience['achievements'] }}</p>
+                            @endif
+                            @if (!empty($experience['duties']))
+                                <p>Responsabilidades:</p>
+                                <p>{{ implode('; ', is_array($experience['duties']) ? $experience['duties'] : explode(',', $experience['duties'])) }}</p>
+                            @endif
+                        </div>
+                    @endforeach
                 @else
-                    <p>Sem idiomas adicionados.</p>
+                    <p>Sem experiência adicionada.</p>
                 @endif
             </div>
 
@@ -202,48 +208,20 @@
                 @endif
             </div>
 
-            <!-- Experience -->
-            <div class="section">
-                <div class="section__title">Experiência</div>
-                @if (!empty($experiences))
-                    @foreach ($experiences as $experience)
-                        <div class="experience-item">
-                            <h3>{{ $experience['title'] }} - {{ $experience['company_name'] }}</h3>
-                            <p><em>{{ $experience['start_date'] }} - {{ $experience['end_date'] ?: 'Atual' }}</em></p>
-                            @if (!empty($experience['company_description']))
-                                <p>Descrição da Empresa: {{ $experience['company_description'] }}</p>
-                            @endif
-                            @if (!empty($experience['achievements']))
-                                <p>Conquistas: {{ $experience['achievements'] }}</p>
-                            @endif
-                            @if (!empty($experience['duties']))
-                                <p>Responsabilidades:</p>
-                                <ul>
-                                    @foreach (is_array($experience['duties']) ? $experience['duties'] : explode(',', $experience['duties']) as $duty)
-                                        <li>{{ trim($duty) }}</li>
-                                    @endforeach
-                                </ul>
-                            @endif
-                        </div>
-                    @endforeach
-                @else
-                    <p>Sem experiência adicionada.</p>
-                @endif
-            </div>
-
             <!-- Additional Information -->
             <div class="section">
                 <div class="section__title">Informações Adicionais</div>
                 @if (!empty($additional_information))
-                    <ul>
-                        @foreach ($additional_information as $info)
-                            <li>{{ $info }}</li>
-                        @endforeach
-                    </ul>
+                    <p>{{ implode('; ', $additional_information) }}</p>
                 @else
                     <p>Sem informações adicionais.</p>
                 @endif
             </div>
+        </div>
+
+        <!-- Footer (spanning both columns) -->
+        <div class="footer">
+            <p>www.enhancv.com • Powered by Enhancv</p>
         </div>
     </div>
 </body>

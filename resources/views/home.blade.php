@@ -262,23 +262,39 @@
                                     value="{{ old('duties.0') }}"
                                 >
                             </div>
-                            <button
-                                type="button"
-                                class="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 add-duty"
-                            >
-                                Adicionar Responsabilidade
-                            </button>
+                            <div class="mt-2 flex justify-between">
+                                <button
+                                    type="button"
+                                    class="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 add-duty text-sm"
+                                >
+                                    Adicionar Responsabilidade
+                                </button>
+                                <button
+                                    type="button"
+                                    class="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 remove-field text-sm"
+                                >
+                                    Remover
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <!-- Add Experience Button -->
-                <button
-                    type="button"
-                    id="add-experience"
-                    class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                >
-                    Adicionar Experiência
-                </button>
+                <div class="mt-4 flex justify-between">
+                    <button
+                        type="button"
+                        id="add-experience"
+                        class="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm"
+                    >
+                        Adicionar Experiência
+                    </button>
+                    <button
+                        type="button"
+                        class="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 remove-field text-sm"
+                    >
+                        Remover
+                    </button>
+                </div>
             </div>
 
             <!-- Education -->
@@ -321,16 +337,22 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="mt-4 flex justify-between">
+                            <button
+                                type="button"
+                                class="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 add-education text-sm"
+                            >
+                                Adicionar Educação
+                            </button>
+                            <button
+                                type="button"
+                                class="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 remove-field text-sm"
+                            >
+                                Remover
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <!-- Add Education Button -->
-                <button
-                    type="button"
-                    id="add-education"
-                    class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                >
-                    Adicionar Educação
-                </button>
             </div>
 
             <!-- Languages -->
@@ -387,16 +409,22 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="mt-4 flex justify-between">
+                            <button
+                                type="button"
+                                class="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 add-language text-sm"
+                            >
+                                Adicionar Idioma
+                            </button>
+                            <button
+                                type="button"
+                                class="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 remove-field text-sm"
+                            >
+                                Remover
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <!-- Add Language Button -->
-                <button
-                    type="button"
-                    id="add-language"
-                    class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                >
-                    Adicionar Idioma
-                </button>
             </div>
 
             <!-- Additional Information -->
@@ -411,12 +439,20 @@
                         value="{{ old('additional_information.0') }}"
                     >
                 </div>
-                <button
-                    type="button"
-                    class="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 add-additional-info"
-                >
-                    Adicionar Informação Adicional
-                </button>
+                <div class="mt-2 flex justify-between">
+                    <button
+                        type="button"
+                        class="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 add-additional-info text-sm"
+                    >
+                        Adicionar Informação Adicional
+                    </button>
+                    <button
+                        type="button"
+                        class="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 remove-field text-sm"
+                    >
+                        Remover
+                    </button>
+                </div>
             </div>
 
             <!-- References -->
@@ -457,16 +493,22 @@
                                 >
                             </div>
                         </div>
+                        <div class="mt-4 flex justify-between">
+                            <button
+                                type="button"
+                                class="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 add-reference text-sm"
+                            >
+                                Adicionar Referência
+                            </button>
+                            <button
+                                type="button"
+                                class="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 remove-field text-sm"
+                            >
+                                Remover
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <!-- Add Reference Button -->
-                <button
-                    type="button"
-                    id="add-reference"
-                    class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                >
-                    Adicionar Referência
-                </button>
             </div>
 
             <!-- Skills -->
@@ -497,48 +539,72 @@
 </div>
 
 <script>
-    // JavaScript to handle adding new experience, education, language, additional info, and reference fields
+    // JavaScript to handle adding and removing new experience, education, language, additional info, reference fields, and duties
     document.getElementById('add-experience').addEventListener('click', function() {
         const experienceFields = document.getElementById('experience-fields');
         const newExperienceField = document.querySelector('.experience-field').cloneNode(true);
         newExperienceField.querySelectorAll('input, textarea, select').forEach(element => {
             element.value = '';
         });
+        // Clear duties fields in the new experience
+        newExperienceField.querySelector('#duties-fields').innerHTML = `
+            <input type="text" name="duties[]" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" placeholder="Digite uma responsabilidade" value="">
+        `;
+        // Update button classes for new field
+        newExperienceField.querySelector('.add-duty').classList.add('text-sm');
+        newExperienceField.querySelector('.remove-field').classList.add('text-sm');
         experienceFields.appendChild(newExperienceField);
     });
 
-    document.getElementById('add-education').addEventListener('click', function() {
-        const educationFields = document.getElementById('education-fields');
-        const newEducationField = document.querySelector('.education-field').cloneNode(true);
-        newEducationField.querySelectorAll('input, select').forEach(element => {
-            element.value = '';
+    document.querySelectorAll('.add-education').forEach(button => {
+        button.addEventListener('click', function() {
+            const educationFields = document.getElementById('education-fields');
+            const newEducationField = document.querySelector('.education-field').cloneNode(true);
+            newEducationField.querySelectorAll('input, select').forEach(element => {
+                element.value = '';
+            });
+            // Update button classes for new field
+            newEducationField.querySelector('.add-education').classList.add('text-sm');
+            newEducationField.querySelector('.remove-field').classList.add('text-sm');
+            educationFields.appendChild(newEducationField);
         });
-        educationFields.appendChild(newEducationField);
     });
 
-    document.getElementById('add-language').addEventListener('click', function() {
-        const languageFields = document.getElementById('language-fields');
-        const newLanguageField = document.querySelector('.language-field').cloneNode(true);
-        newLanguageField.querySelectorAll('input, select').forEach(element => {
-            element.value = '';
+    document.querySelectorAll('.add-language').forEach(button => {
+        button.addEventListener('click', function() {
+            const languageFields = document.getElementById('language-fields');
+            const newLanguageField = document.querySelector('.language-field').cloneNode(true);
+            newLanguageField.querySelectorAll('input, select').forEach(element => {
+                element.value = '';
+            });
+            // Update button classes for new field
+            newLanguageField.querySelector('.add-language').classList.add('text-sm');
+            newLanguageField.querySelector('.remove-field').classList.add('text-sm');
+            languageFields.appendChild(newLanguageField);
         });
-        languageFields.appendChild(newLanguageField);
     });
 
-    document.querySelector('.add-additional-info').addEventListener('click', function() {
-        const additionalInfoFields = document.getElementById('additional-info-fields');
-        const newAdditionalInfoField = additionalInfoFields.querySelector('input').cloneNode(true);
-        newAdditionalInfoField.value = '';
-        additionalInfoFields.appendChild(newAdditionalInfoField);
+    document.querySelectorAll('.add-additional-info').forEach(button => {
+        button.addEventListener('click', function() {
+            const additionalInfoFields = document.getElementById('additional-info-fields');
+            const newAdditionalInfoField = additionalInfoFields.querySelector('input').cloneNode(true);
+            newAdditionalInfoField.value = '';
+            additionalInfoFields.appendChild(newAdditionalInfoField);
+        });
     });
 
-    document.getElementById('add-reference').addEventListener('click', function() {
-        const referenceFields = document.getElementById('reference-fields');
-        const newReferenceField = document.querySelector('.reference-field').cloneNode(true);
-        newReferenceField.querySelectorAll('input').forEach(element => {
-            element.value = '';
+    document.querySelectorAll('.add-reference').forEach(button => {
+        button.addEventListener('click', function() {
+            const referenceFields = document.getElementById('reference-fields');
+            const newReferenceField = document.querySelector('.reference-field').cloneNode(true);
+            newReferenceField.querySelectorAll('input').forEach(element => {
+                element.value = '';
+            });
+            // Update button classes for new field
+            newReferenceField.querySelector('.add-reference').classList.add('text-sm');
+            newReferenceField.querySelector('.remove-field').classList.add('text-sm');
+            referenceFields.appendChild(newReferenceField);
         });
-        referenceFields.appendChild(newReferenceField);
     });
 
     document.querySelectorAll('.add-duty').forEach(button => {
@@ -547,6 +613,22 @@
             const newDutyField = dutiesFields.querySelector('input').cloneNode(true);
             newDutyField.value = '';
             dutiesFields.appendChild(newDutyField);
+        });
+    });
+
+    // JavaScript to handle removing fields
+    document.querySelectorAll('.remove-field').forEach(button => {
+        button.addEventListener('click', function() {
+            const parentField = button.closest('.experience-field, .education-field, .language-field, .reference-field');
+            if (parentField) {
+                parentField.remove();
+            } else {
+                // For additional info or duties, remove the specific input
+                const input = button.closest('input');
+                if (input) {
+                    input.remove();
+                }
+            }
         });
     });
 </script>

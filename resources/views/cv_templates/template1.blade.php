@@ -13,38 +13,40 @@
         body {
             min-height: 100%;
             background: #fff;
-            font-family: 'Lato', sans-serif;
+            font-family: 'Roboto', sans-serif; /* Modern font: Roboto */
             font-weight: 400;
             color: #222;
-            font-size: 12px;
-            line-height: 16px;
+            font-size: 10px; /* Reduced font size to fit on one page */
+            line-height: 14px;
             padding: 0;
         }
         .cv-container {
             width: 100%;
-            max-width: 1000px;
+            max-width: 800px; /* Adjusted to match a clean, single-page layout */
             margin: 0 auto;
+            padding: 20px; /* Minimal padding for clean look */
             display: flex;
             justify-content: space-between;
-            border: 1px solid #ddd;
         }
         .left-column, .right-column {
             width: 48%;
-            padding: 20px; /* Basic, even padding for both columns */
+        }
+        .title {
+            text-align: left;
+            font-size: 16px;
+            font-style: italic; /* Slightly italicized title */
+            margin-bottom: 10px;
+            color: #555;
         }
         .header {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            text-align: left; /* Changed from center to left alignment */
         }
         .header h1 {
             font-size: 24px;
+            font-weight: bold;
             text-transform: uppercase;
             margin-bottom: 5px;
-        }
-        .header .first-name {
-            font-weight: 700;
-        }
-        .header .last-name {
-            font-weight: 300;
         }
         .role {
             font-size: 16px; /* Slightly larger for job position */
@@ -56,32 +58,38 @@
         }
         .contact-info p, .summary p {
             margin: 3px 0;
-            font-size: 12px;
+            font-size: 10px;
             color: #555;
         }
         .section__title {
-            letter-spacing: 1px;
-            color: #54AFE4;
+            font-size: 14px;
             font-weight: bold;
             margin-bottom: 5px;
             text-transform: uppercase;
-            font-size: 14px;
+            color: #222;
         }
         .experience-item, .education-item, .reference-item {
             margin-bottom: 10px;
         }
         .experience-item h3, .education-item h3, .reference-item h3 {
-            font-size: 14px;
-            color: #2c3e50;
-            margin: 0;
-        }
-        .skills-list {
-            list-style: none; /* Remove bullet points */
-        }
-        .skills-list li {
-            margin-bottom: 5px; /* Each skill on its own line */
-            color: #555;
             font-size: 12px;
+            font-weight: bold;
+            color: #222;
+            margin: 0 0 5px 0;
+        }
+        .experience-item p, .education-item p, .reference-item p {
+            margin: 2px 0;
+            font-size: 10px;
+            color: #555;
+        }
+        .skills-list, .languages-list {
+            list-style: none;
+            margin-bottom: 5px;
+        }
+        .skills-list li, .languages-list li {
+            margin-bottom: 3px;
+            font-size: 10px;
+            color: #555;
         }
         .language-table {
             width: 100%;
@@ -97,14 +105,26 @@
         .language-table th {
             background-color: #f2f2f2;
         }
+        .footer {
+            text-align: center;
+            font-size: 8px;
+            color: #777;
+            margin-top: 15px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+            width: 100%; /* Span across both columns */
+        }
     </style>
-    <link href='https://fonts.googleapis.com/css?family=Lato:400,300,700' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+    <link href='https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap' rel='stylesheet' type='text/css'>
 </head>
 <body>
     <div class="cv-container">
-        <!-- Left Column: Personal Information -->
+        <!-- Left Column: Personal Data, Summary, Education -->
         <div class="left-column">
+            <!-- Title -->
+            <div class="title">Currículo Vitae</div>
+
+            <!-- Header -->
             <div class="header">
                 <h1>
                     <span class="first-name">{{ $first_name }}</span>
@@ -114,14 +134,12 @@
             </div>
 
             <div class="contact-info">
-                <p><i class="fas fa-phone"></i> {{ $phone_number }}</p>
-                <p><i class="fas fa-envelope"></i> {{ $email }}</p>
-                <p><i class="fab fa-linkedin"></i> {{ $linkedin }}</p>
-                <p><i class="fas fa-map-marker-alt"></i> {{ $location }}</p>
-                <p><i class="fas fa-globe"></i> Nacionalidade: {{ $nationality }}</p>
-                <p><i class="fas fa-birthday-cake"></i> Data de Nascimento: {{ $date_of_birth }}</p>
-                <p><i class="fas fa-map-pin"></i> Local de Nascimento: {{ $place_of_birth }}</p>
-                <p><i class="fas fa-venus-mars"></i> Gênero: {{ $gender == 'male' ? 'Masculino' : ($gender == 'female' ? 'Feminino' : 'Outro') }}</p>
+                <p>{{ $email }} • {{ $linkedin }} • {{ $phone_number }}</p>
+                <p>{{ $location }}</p>
+                <p>Nacionalidade: {{ $nationality }}</p>
+                <p>Data de Nascimento: {{ $date_of_birth }}</p>
+                <p>Local de Nascimento: {{ $place_of_birth }}</p>
+                <p>Gênero: {{ $gender == 'male' ? 'Masculino' : ($gender == 'female' ? 'Feminino' : 'Outro') }}</p>
             </div>
 
             <div class="section summary">
@@ -143,8 +161,11 @@
                     <p>Sem educação adicionada.</p>
                 @endif
             </div>
+        </div>
 
-            <!-- Skills (each on its own line, no background) -->
+        <!-- Right Column: Skills, Languages, Experience, References, Additional Information -->
+        <div class="right-column">
+            <!-- Skills -->
             <div class="section">
                 <div class="section__title">Habilidades</div>
                 <ul class="skills-list">
@@ -157,10 +178,7 @@
                     @endif
                 </ul>
             </div>
-        </div>
 
-        <!-- Right Column: Professional Information -->
-        <div class="right-column">
             <!-- Languages -->
             <div class="section">
                 <div class="section__title">Idiomas</div>
@@ -183,22 +201,6 @@
                     </table>
                 @else
                     <p>Sem idiomas adicionados.</p>
-                @endif
-            </div>
-
-            <!-- References -->
-            <div class="section">
-                <div class="section__title">Referências</div>
-                @if (!empty($references))
-                    @foreach ($references as $reference)
-                        <div class="reference-item">
-                            <h3>{{ $reference['reference_name'] }}</h3>
-                            <p>Cargo: {{ $reference['reference_position'] }}</p>
-                            <p>Telefone: {{ $reference['reference_phone'] }}</p>
-                        </div>
-                    @endforeach
-                @else
-                    <p>Sem referências adicionadas.</p>
                 @endif
             </div>
 
@@ -228,6 +230,22 @@
                     @endforeach
                 @else
                     <p>Sem experiência adicionada.</p>
+                @endif
+            </div>
+
+            <!-- References -->
+            <div class="section">
+                <div class="section__title">Referências</div>
+                @if (!empty($references))
+                    @foreach ($references as $reference)
+                        <div class="reference-item">
+                            <h3>{{ $reference['reference_name'] }}</h3>
+                            <p>Cargo: {{ $reference['reference_position'] }}</p>
+                            <p>Telefone: {{ $reference['reference_phone'] }}</p>
+                        </div>
+                    @endforeach
+                @else
+                    <p>Sem referências adicionadas.</p>
                 @endif
             </div>
 
