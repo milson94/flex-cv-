@@ -77,13 +77,19 @@ SAMPLE_RESUME_DATA = {
     'phone': '+1-(234)-555-1234',
     'linkedin': 'linkedin.com/in/maevedelaney',
     'location': 'Charlotte, North Carolina',
+    'id_number': '123-45-6789',  # New field
+    'nationality': 'American',
+    'birth_date': '1985-03-15',
+    'gender': 'Female',
+    'website': 'https://maevedelaney.com',
+    'address': '123 Main St, Charlotte, NC 28202',
     'profile_image_path': 'static/images/sample_profile.jpg', # Ensure this image exists
 
     'summary': 'Dynamic procurement specialist with over 5 years of experience in strategic sourcing and team management. Highly skilled in supply chain optimization and developing category strategies. Proven leader with an MBA and a solid track record in transformative sourcing initiatives, delivering significant cost savings and operational efficiencies.',
 
     'key_achievements': [
         {'title': 'Implemented Supplier Performance Management System', 'description': 'Successfully introduced a systematic approach to evaluating and improving supplier performance, elevating efficiency by 10%.'},
-        {'title': 'Managed $500M Indirect Spend Portfolio', 'description': 'Directed strategic allocation and cost-saving initiatives across diverse departments, optimizing the company’s substantial indirect spend.'},
+        {'title': 'Managed $500M Indirect Spend Portfolio', 'description': 'Directed strategic allocation and cost-saving initiatives across diverse departments, optimizing the company's substantial indirect spend.'},
         {'title': 'Achieved 15% Annual Cost Savings', 'description': 'Strategized and executed a category management plan for medical supplies that slashed annual costs significantly.'}
     ],
     'courses': [
@@ -129,7 +135,25 @@ SAMPLE_RESUME_DATA = {
             'edu_details': 'Graduated with Honors.'
         }
     ],
-     'languages': [], # ADDED
+    'languages': [
+        {
+            'name': 'English',
+            'level': 'Native',
+            'reading': 'Native',
+            'writing': 'Native',
+            'speaking': 'Native'
+        },
+        {
+            'name': 'Spanish',
+            'level': 'Intermediate',
+            'reading': 'Good',
+            'writing': 'Basic',
+            'speaking': 'Good'
+        }
+    ],
+    'skills': 'Strategic Sourcing, Supply Chain Management, Team Leadership, Contract Negotiation, Cost Reduction, Supplier Management',
+    'hobbies': 'Photography, Hiking, Reading, Cooking',
+    'custom_fields': [],  # New field for custom sections
     # section_order will be added dynamically
 }
 
@@ -175,9 +199,12 @@ def resume_form():
             'phone': request.form.get('phone', '').strip(),
             'linkedin': request.form.get('linkedin', '').strip(),
             'location': request.form.get('location', '').strip(),
+            'id_number': request.form.get('id_number', '').strip(),  # New field
             'nationality': request.form.get('nationality', '').strip(),
             'birth_date': request.form.get('birth_date', '').strip(),
             'gender': request.form.get('gender', '').strip(),
+            'website': request.form.get('website', '').strip(),
+            'address': request.form.get('address', '').strip(),
             'profile_image_path': existing_profile_path, # Keep existing image path for now
             'summary': request.form.get('summary', '').strip(),
             'place_of_birth': request.form.get('place_of_birth', '').strip(),  # Novo
@@ -185,8 +212,6 @@ def resume_form():
             'driving_license': request.form.get('driving_license', '').strip(),
             'marital_status': request.form.get('marital_status', '').strip(),
             'military_service': request.form.get('military_service', '').strip(),
-            'website': request.form.get('website', '').strip(),
-            'address': request.form.get('address', '').strip(),
             'skills': request.form.get('skills', '').strip(),
             'hobbies': request.form.get('hobbies', '').strip(),
             'key_achievements': [],
@@ -197,19 +222,23 @@ def resume_form():
             'additional_info': [],
             'references': [],
             'projects': [],
+            'custom_fields': [],  # New field
         }
 
         # --- Parsing logic for lists ---
-        # Key Achievements (fixed number)
-        for i in range(1, 4):
-            ach_title = request.form.get(f'ach_title_{i}', '').strip()
-            if ach_title: # Only add if title is present
-                resume_data['key_achievements'].append({
-                    'title': ach_title,
-                    'description': request.form.get(f'ach_description_{i}', '').strip()
-                })
+        # Key Achievements (dynamic number)
+        i = 0
+        while True:
+            ach_title_key = f'ach_title_{i}'
+            if ach_title_key not in request.form or not request.form[ach_title_key].strip():
+                break
+            resume_data['key_achievements'].append({
+                'title': request.form[ach_title_key].strip(),
+                'description': request.form.get(f'ach_description_{i}', '').strip()
+            })
+            i += 1
 
-        # Courses (fixed number)
+        # Courses (fixed number - keeping original logic for backward compatibility)
         for i in range(1, 3):
             course_title = request.form.get(f'course_title_{i}', '').strip()
             if course_title: # Only add if title is present
@@ -256,7 +285,7 @@ def resume_form():
             })
             i += 1
 
-        # Languages (dynamic number)
+        # Languages (dynamic number) - Enhanced with proficiency levels
         i = 0
         while True:
             lang_name_key = f'lang_name[{i}]'
@@ -266,7 +295,8 @@ def resume_form():
                 'name': request.form[lang_name_key].strip(),
                 'level': request.form.get(f'lang_level[{i}]', '').strip(),
                 'reading': request.form.get(f'lang_reading[{i}]', '').strip(),
-                'writing': request.form.get(f'lang_writing[{i}]', '').strip()
+                'writing': request.form.get(f'lang_writing[{i}]', '').strip(),
+                'speaking': request.form.get(f'lang_speaking[{i}]', '').strip()
             })
             i += 1
 
@@ -278,7 +308,7 @@ def resume_form():
                 break
             resume_data['additional_info'].append({
                 'title': request.form[info_title_key].strip(),
-                'description': request.form.get(f'info_description[{i}]', '').strip()
+                'description': request.form.get(f'info_description[{i}', '').strip()
             })
             i += 1
 
@@ -309,6 +339,23 @@ def resume_form():
             })
             i += 1
 
+        # Custom Fields (dynamic number) - New feature
+        i = 0
+        while True:
+            custom_title_key = f'custom_title_{i}'
+            if custom_title_key not in request.form or not request.form[custom_title_key].strip():
+                break
+            custom_field = {
+                'title': request.form[custom_title_key].strip(),
+                'content': request.form.get(f'custom_content_{i}', '').strip(),
+                'section_key': f'custom_{i}'  # Generate a unique section key
+            }
+            resume_data['custom_fields'].append(custom_field)
+            
+            # Add to reorderable sections dynamically
+            REORDERABLE_SECTIONS[f'custom_{i}'] = custom_field['title']
+            i += 1
+
         # --- End of Parsing Logic ---
 
         # Add default section order when saving data
@@ -336,6 +383,12 @@ def order_sections():
 
     resume_data = session['resume_data']
     current_order = resume_data.get('section_order', DEFAULT_SECTION_ORDER)
+
+    # Add custom fields to reorderable sections if they exist
+    if 'custom_fields' in resume_data:
+        for custom_field in resume_data['custom_fields']:
+            section_key = custom_field.get('section_key', f"custom_{len(REORDERABLE_SECTIONS)}")
+            REORDERABLE_SECTIONS[section_key] = custom_field['title']
 
     if request.method == 'POST':
         new_order_str = request.form.get('section_order')

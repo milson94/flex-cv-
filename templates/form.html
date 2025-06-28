@@ -1,807 +1,783 @@
+<!-- templates/form.html -->
 {% extends "base.html" %}
 
 {% block head_extra_styles %}
-{# No extra styles needed, using base styles #}
+<style>
+    .field-group {
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        background-color: #f8fafc;
+    }
+    
+    .field-group.removable {
+        position: relative;
+        border-left: 4px solid #3b82f6;
+    }
+    
+    .remove-field-btn {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: #ef4444;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        font-size: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .remove-field-btn:hover {
+        background: #dc2626;
+    }
+    
+    .add-field-btn {
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+    }
+    
+    .add-field-btn:hover {
+        background: #059669;
+    }
+    
+    .prefilled-field {
+        background-color: #f1f5f9;
+        color: #64748b;
+    }
+    
+    .field-visibility-toggle {
+        margin-left: 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .hidden-field {
+        opacity: 0.5;
+        background-color: #f8f9fa;
+    }
+    
+    .dynamic-section {
+        border: 2px dashed #cbd5e1;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        background-color: #f8fafc;
+    }
+    
+    .section-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .proficiency-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto bg-white p-6 md:p-10 rounded-xl shadow-lg">
-    <h1 class="text-3xl font-bold text-center text-sky-700 mb-8">{{ title }}</h1>
-    <p class="text-center text-slate-500 text-sm mb-6">Preencha seus detalhes abaixo. Você pode adicionar múltiplas experiências e entradas de educação.</p>
+<div class="max-w-4xl mx-auto bg-white p-6 md:p-10 rounded-xl shadow-lg">
+    <h1 class="text-3xl font-bold text-center text-sky-700 mb-6">{{ title }}</h1>
+    <p class="text-center text-slate-600 mb-8">Fill out your resume information below. Fields marked with * are required.</p>
+
     <form method="POST" action="{{ url_for('resume_form') }}" class="space-y-8">
+        
+        <!-- Personal Information Section -->
+        <fieldset class="field-group">
+            <legend class="text-lg font-semibold text-sky-700 mb-4">Personal Information</legend>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Full Name -->
+                <div>
+                    <label for="full_name" class="block text-sm font-medium text-slate-700">Full Name *</label>
+                    <input type="text" id="full_name" name="full_name" 
+                           value="{{ data.full_name or '' }}" 
+                           class="form-input-base" required>
+                </div>
 
-        <!-- Personal Details Section -->
-        <fieldset class="border border-slate-300 p-6 rounded-md">
-            <legend class="text-xl font-semibold text-sky-600 px-2 mb-4">Detalhes Pessoais</legend>
-            <div class="space-y-4">
+                <!-- ID Number (new field) -->
                 <div>
-                    <label for="full_name" class="block text-sm font-medium text-slate-700 mb-1">Primeiro Nome:</label>
-                    <input type="text" id="full_name" name="full_name" required value="{{ data.full_name | default('João', true) }}" class="form-input-base">
+                    <label for="id_number" class="block text-sm font-medium text-slate-700">
+                        ID Number
+                        <input type="checkbox" class="field-visibility-toggle" checked onchange="toggleFieldVisibility(this, 'id_number')">
+                        <span class="text-xs text-slate-500">Show/Hide</span>
+                    </label>
+                    <input type="text" id="id_number" name="id_number" 
+                           value="{{ data.id_number or '123-45-6789' }}" 
+                           class="form-input-base prefilled-field"
+                           placeholder="Enter your ID number">
                 </div>
+
+                <!-- Title/Subtitle -->
+                <div class="md:col-span-2">
+                    <label for="title_subtitle" class="block text-sm font-medium text-slate-700">Professional Title</label>
+                    <input type="text" id="title_subtitle" name="title_subtitle" 
+                           value="{{ data.title_subtitle or '' }}" 
+                           class="form-input-base"
+                           placeholder="e.g., Senior Software Engineer | Full Stack Developer">
+                </div>
+
+                <!-- Email -->
                 <div>
-                    <label for="title_subtitle" class="block text-sm font-medium text-slate-700 mb-1">Cargo que está se candidatando:</label>
-                    <input type="text" id="title_subtitle" name="title_subtitle" value="{{ data.title_subtitle | default('Desenvolvedor Web Sênior', true) }}" class="form-input-base">
+                    <label for="email" class="block text-sm font-medium text-slate-700">Email *</label>
+                    <input type="email" id="email" name="email" 
+                           value="{{ data.email or '' }}" 
+                           class="form-input-base" required>
                 </div>
+
+                <!-- Phone -->
                 <div>
-                    <label for="email" class="block text-sm font-medium text-slate-700 mb-1">Email:</label>
-                    <input type="email" id="email" name="email" required value="{{ data.email | default('joao.silva@email.com', true) }}" class="form-input-base">
+                    <label for="phone" class="block text-sm font-medium text-slate-700">
+                        Phone
+                        <input type="checkbox" class="field-visibility-toggle" checked onchange="toggleFieldVisibility(this, 'phone')">
+                        <span class="text-xs text-slate-500">Show/Hide</span>
+                    </label>
+                    <input type="tel" id="phone" name="phone" 
+                           value="{{ data.phone or '' }}" 
+                           class="form-input-base">
                 </div>
+
+                <!-- LinkedIn -->
                 <div>
-                    <label for="phone" class="block text-sm font-medium text-slate-700 mb-1">Telefone:</label>
-                    <input type="tel" id="phone" name="phone" value="{{ data.phone | default('+351 912 345 678', true) }}" class="form-input-base">
+                    <label for="linkedin" class="block text-sm font-medium text-slate-700">
+                        LinkedIn
+                        <input type="checkbox" class="field-visibility-toggle" checked onchange="toggleFieldVisibility(this, 'linkedin')">
+                        <span class="text-xs text-slate-500">Show/Hide</span>
+                    </label>
+                    <input type="url" id="linkedin" name="linkedin" 
+                           value="{{ data.linkedin or '' }}" 
+                           class="form-input-base">
                 </div>
+
+                <!-- Location -->
                 <div>
-                    <label for="linkedin" class="block text-sm font-medium text-slate-700 mb-1">LinkedIn/Portfólio:</label>
-                    <input type="text" id="linkedin" name="linkedin" value="{{ data.linkedin | default('linkedin.com/in/joaosilvadev', true) }}" class="form-input-base">
+                    <label for="location" class="block text-sm font-medium text-slate-700">
+                        Location
+                        <input type="checkbox" class="field-visibility-toggle" checked onchange="toggleFieldVisibility(this, 'location')">
+                        <span class="text-xs text-slate-500">Show/Hide</span>
+                    </label>
+                    <input type="text" id="location" name="location" 
+                           value="{{ data.location or '' }}" 
+                           class="form-input-base">
                 </div>
+
+                <!-- Additional Personal Fields -->
                 <div>
-                    <label for="location" class="block text-sm font-medium text-slate-700 mb-1">Local de Nascimento:</label>
-                    <input type="text" id="location" name="location" value="{{ data.location | default('Porto, Portugal', true) }}" class="form-input-base">
+                    <label for="nationality" class="block text-sm font-medium text-slate-700">
+                        Nationality
+                        <input type="checkbox" class="field-visibility-toggle" onchange="toggleFieldVisibility(this, 'nationality')">
+                        <span class="text-xs text-slate-500">Show/Hide</span>
+                    </label>
+                    <input type="text" id="nationality" name="nationality" 
+                           value="{{ data.nationality or '' }}" 
+                           class="form-input-base hidden-field">
                 </div>
+
                 <div>
-                    <label for="nationality" class="block text-sm font-medium text-slate-700 mb-1">Nacionalidade:</label>
-                    <select id="nationality" name="nationality" class="form-input-base">
-                        <option value="Moçambicana" {% if data.nationality == 'Moçambicana' %}selected{% endif %}>Moçambicana</option>
-                        <option value="Portuguesa" {% if data.nationality == 'Portuguesa' %}selected{% endif %}>Portuguesa</option>
-                        <option value="Brasileira" {% if data.nationality == 'Brasileira' %}selected{% endif %}>Brasileira</option>
-                        <option value="Angolana" {% if data.nationality == 'Angolana' %}selected{% endif %}>Angolana</option>
-                        <option value="Americana" {% if data.nationality == 'Americana' %}selected{% endif %}>Americana</option>
-                        <!-- Add more nationalities as needed -->
-                    </select>
+                    <label for="birth_date" class="block text-sm font-medium text-slate-700">
+                        Birth Date
+                        <input type="checkbox" class="field-visibility-toggle" onchange="toggleFieldVisibility(this, 'birth_date')">
+                        <span class="text-xs text-slate-500">Show/Hide</span>
+                    </label>
+                    <input type="date" id="birth_date" name="birth_date" 
+                           value="{{ data.birth_date or '' }}" 
+                           class="form-input-base hidden-field">
                 </div>
+
                 <div>
-                    <label for="birth_date" class="block text-sm font-medium text-slate-700 mb-1">Data de Nascimento:</label>
-                    <input type="date" id="birth_date" name="birth_date" value="{{ data.birth_date | default('1990-05-15', true) }}" class="form-input-base">
+                    <label for="website" class="block text-sm font-medium text-slate-700">
+                        Website
+                        <input type="checkbox" class="field-visibility-toggle" onchange="toggleFieldVisibility(this, 'website')">
+                        <span class="text-xs text-slate-500">Show/Hide</span>
+                    </label>
+                    <input type="url" id="website" name="website" 
+                           value="{{ data.website or '' }}" 
+                           class="form-input-base hidden-field">
                 </div>
+
                 <div>
-                    <label for="gender" class="block text-sm font-medium text-slate-700 mb-1">Gênero:</label>
-                    <select id="gender" name="gender" class="form-input-base">
-                        <option value="Masculino" {% if data.gender == 'Masculino' %}selected{% endif %}>Masculino</option>
-                        <option value="Feminino" {% if data.gender == 'Feminino' %}selected{% endif %}>Feminino</option>
-                        <option value="Outro" {% if data.gender == 'Outro' %}selected{% endif %}>Outro</option>
-                        <option value="Prefiro não dizer" {% if data.gender == 'Prefiro não dizer' %}selected{% endif %}>Prefiro não dizer</option>
-                    </select>
+                    <label for="address" class="block text-sm font-medium text-slate-700">
+                        Address
+                        <input type="checkbox" class="field-visibility-toggle" onchange="toggleFieldVisibility(this, 'address')">
+                        <span class="text-xs text-slate-500">Show/Hide</span>
+                    </label>
+                    <input type="text" id="address" name="address" 
+                           value="{{ data.address or '' }}" 
+                           class="form-input-base hidden-field">
                 </div>
-                <div>
-                    <label for="summary" class="block text-sm font-medium text-slate-700 mb-1">Resumo Profissional:</label>
-                    <textarea id="summary" name="summary" rows="4" required class="form-textarea-base min-h-[80px]">{{ data.summary | default('Motivated Digital Marketing Manager with over 3 years of experience in driving user acquisition and growth through strategic paid campaigns.', true) }}</textarea>
-                </div>
-                <!-- NOTE: Profile Image upload is not implemented here, using default/sample -->
-                <input type="hidden" name="profile_image_path" value="{{ data.profile_image_path | default('', true) }}">
-                {% if data.profile_image_path %}
-                 <p class="text-xs text-slate-500 mt-1">Current profile image path: {{ data.profile_image_path }} (Feature to upload not added yet).</p>
-                {% endif %}
             </div>
         </fieldset>
 
-        <!-- Key Achievements -->
-        <fieldset class="border border-slate-300 p-6 rounded-md">
-            <legend class="text-xl font-semibold text-sky-600 px-2 mb-4">Principais Conquistas (Opcional, Máx 3)</legend>
-            <div id="achievements-container" class="space-y-4">
-              {% for i in range(1, 4) %}
-              {% set ach = data.key_achievements[loop.index0] if data.key_achievements and loop.index0 < data.key_achievements|length else {} %}
-              <div class="achievement-block p-3 border border-slate-200 rounded-md bg-slate-50 relative">
-                  <button type="button" onclick="removeBlock(this, 'achievement-block')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-xl px-2 py-0 leading-none rounded-full hover:bg-red-100 transition-colors" title="Remover Conquista">×</button>
-                  <h4 class="text-md font-medium text-slate-600 mb-2">Conquista {{i}}</h4>
-                  <div>
-                      <label for="ach_title_{{i}}" class="block text-sm font-medium text-slate-700 mb-1">Título:</label>
-                      <input type="text" id="ach_title_{{i}}" name="ach_title_{{i}}" value="{{ ach.title | default('', true) }}" class="form-input-base">
-                  </div>
-                  <div class="mt-3">
-                      <label for="ach_description_{{i}}" class="block text-sm font-medium text-slate-700 mb-1">Descrição:</label>
-                      <textarea id="ach_description_{{i}}" name="ach_description_{{i}}" rows="2" class="form-textarea-base min-h-[60px]">{{ ach.description | default('', true) }}</textarea>
-                  </div>
-              </div>
-              {% endfor %}
+        <!-- Professional Summary -->
+        <fieldset class="field-group">
+            <legend class="text-lg font-semibold text-sky-700 mb-4">
+                Professional Summary
+                <input type="checkbox" class="field-visibility-toggle" checked onchange="toggleSectionVisibility(this, 'summary-section')">
+                <span class="text-xs text-slate-500">Show/Hide Section</span>
+            </legend>
+            <div id="summary-section">
+                <label for="summary" class="block text-sm font-medium text-slate-700">Summary</label>
+                <textarea id="summary" name="summary" rows="4" 
+                          class="form-textarea-base"
+                          placeholder="Write a brief professional summary...">{{ data.summary or '' }}</textarea>
             </div>
-            <button type="button" id="add-achievement-btn" class="mt-6 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                + Adicionar Conquista
-            </button>
         </fieldset>
 
-        <!-- Courses -->
-        <fieldset class="border border-slate-300 p-6 rounded-md">
-            <legend class="text-xl font-semibold text-sky-600 px-2 mb-4">Cursos/Certificações (Opcional, Máx 2)</legend>
-             <div id="courses-container" class="space-y-4">
-                {% for i in range(1, 3) %}
-                {% set course = data.courses[loop.index0] if data.courses and loop.index0 < data.courses|length else {} %}
-                <div class="course-block p-3 border border-slate-200 rounded-md bg-slate-50 relative">
-                    <button type="button" onclick="removeBlock(this, 'course-block')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-xl px-2 py-0 leading-none rounded-full hover:bg-red-100 transition-colors" title="Remover Curso">×</button>
-                     <h4 class="text-md font-medium text-slate-600 mb-2">Curso/Cert {{i}}</h4>
-                    <div>
-                        <label for="course_title_{{i}}" class="block text-sm font-medium text-slate-700 mb-1">Título do Curso/Certificado:</label>
-                        <input type="text" id="course_title_{{i}}" name="course_title_{{i}}" value="{{ course.title | default('', true) }}" class="form-input-base">
-                    </div>
-                    <div class="mt-3">
-                        <label for="course_description_{{i}}" class="block text-sm font-medium text-slate-700 mb-1">Descrição/Instituição:</label>
-                        <textarea id="course_description_{{i}}" name="course_description_{{i}}" rows="2" class="form-textarea-base min-h-[60px]">{{ course.description | default('', true) }}</textarea>
-                    </div>
-                </div>
-                {% endfor %}
-             </div>
-             <button type="button" id="add-course-btn" class="mt-6 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                + Adicionar Curso
-            </button>
-        </fieldset>
-
-        <!-- Professional Experience Section -->
-        <fieldset class="border border-slate-300 p-6 rounded-md">
-            <legend class="text-xl font-semibold text-sky-600 px-2 mb-4">Experiência</legend>
-            <div id="experiences-container" class="space-y-6">
-                {% for exp in data.experiences %}
-                <div class="experience-block border border-slate-200 p-4 rounded-md bg-slate-50 relative">
-                    <button type="button" onclick="removeBlock(this, 'experience-block')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-xl px-2 py-0 leading-none rounded-full hover:bg-red-100 transition-colors" title="Remover Experiência">×</button>
-                    <h3 class="text-lg font-medium text-slate-700 mb-3">Experiência <span class="item-number">{{ loop.index }}</span></h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label for="exp_title_{{loop.index0}}" class="block text-sm font-medium text-slate-700 mb-1">Nome da Empresa:</label>
-                            <input type="text" id="exp_title_{{loop.index0}}" name="exp_title[{{loop.index0}}]" value="{{ exp.title | default('Tech Solutions Lda', true) }}" class="form-input-base" required>
-                        </div>
-                        <div>
-                            <label for="exp_company_{{loop.index0}}" class="block text-sm font-medium text-slate-700 mb-1">Cargo:</label>
-                            <input type="text" id="exp_company_{{loop.index0}}" name="exp_company[{{loop.index0}}]" value="{{ exp.company | default('Desenvolvedor Web Sênior', true) }}" class="form-input-base">
-                        </div>
-                        <div>
-                            <label for="exp_location_{{loop.index0}}" class="block text-sm font-medium text-slate-700 mb-1">Localização:</label>
-                            <input type="text" id="exp_location_{{loop.index0}}" name="exp_location[{{loop.index0}}]" value="{{ exp.location | default('', true) }}" class="form-input-base">
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+        <!-- Experience Section -->
+        <fieldset class="field-group">
+            <legend class="text-lg font-semibold text-sky-700 mb-4">
+                Professional Experience
+                <input type="checkbox" class="field-visibility-toggle" checked onchange="toggleSectionVisibility(this, 'experience-section')">
+                <span class="text-xs text-slate-500">Show/Hide Section</span>
+            </legend>
+            <div id="experience-section">
+                <div id="experience-container">
+                    {% for exp in data.experiences %}
+                    <div class="field-group removable experience-item" data-index="{{ loop.index0 }}">
+                        <button type="button" class="remove-field-btn" onclick="removeExperience(this)">×</button>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label for="exp_start_date_{{loop.index0}}" class="block text-sm font-medium text-slate-700 mb-1">Data de Início:</label>
-                                <input type="month" id="exp_start_date_{{loop.index0}}" name="exp_start_date[{{loop.index0}}]" value="{{ exp.start_date | default('2018-03', true) }}" class="form-input-base">
+                                <label class="block text-sm font-medium text-slate-700">Job Title *</label>
+                                <input type="text" name="exp_title[{{ loop.index0 }}]" 
+                                       value="{{ exp.title or '' }}" 
+                                       class="form-input-base" required>
                             </div>
                             <div>
-                                <label for="exp_end_date_{{loop.index0}}" class="block text-sm font-medium text-slate-700 mb-1">Data de Término:</label>
-                                <input type="month" id="exp_end_date_{{loop.index0}}" name="exp_end_date[{{loop.index0}}]" value="{{ exp.end_date | default('', true) }}" class="form-input-base" {% if exp.is_present %}disabled{% endif %}>
+                                <label class="block text-sm font-medium text-slate-700">Company *</label>
+                                <input type="text" name="exp_company[{{ loop.index0 }}]" 
+                                       value="{{ exp.company or '' }}" 
+                                       class="form-input-base" required>
                             </div>
-                            <div class="flex items-center mb-1 pt-6 md:pt-0 md:self-center"> <!-- Adjusted alignment -->
-                                <input type="checkbox" id="exp_present_{{loop.index0}}" name="exp_present[{{loop.index0}}]" class="form-checkbox-base h-5 w-5 text-sky-600 focus:ring-sky-500" onchange="toggleEndDate(this, 'exp_end_date_{{loop.index0}}')" {% if exp.is_present %}checked{% endif %}>
-                                <label for="exp_present_{{loop.index0}}" class="ml-2 text-sm text-slate-700">Atualmente trabalho aqui</label>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700">Location</label>
+                                <input type="text" name="exp_location[{{ loop.index0 }}]" 
+                                       value="{{ exp.location or '' }}" 
+                                       class="form-input-base">
                             </div>
-                        </div>
-                        <div>
-                            <label for="exp_description_{{loop.index0}}" class="block text-sm font-medium text-slate-700 mb-1">Descrição da Empresa:</label>
-                            <textarea id="exp_description_{{loop.index0}}" name="exp_description[{{loop.index0}}]" rows="5" class="form-textarea-base min-h-[100px]" placeholder="- Liderou o desenvolvimento...">{{ exp.description | default('Empresa líder em desenvolvimento de software personalizado para o setor financeiro.', true) }}</textarea>
-                        </div>
-                        <div>
-                            <label for="exp_achievements_{{loop.index0}}" class="block text-sm font-medium text-slate-700 mb-1">Principais Conquistas:</label>
-                            <textarea id="exp_achievements_{{loop.index0}}" name="exp_achievements[{{loop.index0}}]" rows="5" class="form-textarea-base min-h-[100px]" placeholder="- Liderou o desenvolvimento...">{{ exp.achievements | default('Liderou o desenvolvimento de um novo portal do cliente, resultando em um aumento de 25% na satisfação do cliente.', true) }}</textarea>
-                        </div>
-                        <div>
-                            <label for="exp_responsibilities_{{loop.index0}}" class="block text-sm font-medium text-slate-700 mb-1">Principais Responsabilidades:</label>
-                            <textarea id="exp_responsibilities_{{loop.index0}}" name="exp_responsibilities[{{loop.index0}}]" rows="5" class="form-textarea-base min-h-[100px]" placeholder="- Desenvolvimento e manutenção...">{{ exp.responsibilities | default('Desenvolvimento e manutenção de aplicações web usando Laravel e Vue.js', true) }}</textarea>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700">Start Date</label>
+                                <input type="month" name="exp_start_date[{{ loop.index0 }}]" 
+                                       value="{{ exp.start_date or '' }}" 
+                                       class="form-input-base">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700">End Date</label>
+                                <input type="month" name="exp_end_date[{{ loop.index0 }}]" 
+                                       value="{{ exp.end_date or '' }}" 
+                                       class="form-input-base"
+                                       {% if exp.is_present %}disabled{% endif %}>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" name="exp_present[{{ loop.index0 }}]" 
+                                       {% if exp.is_present %}checked{% endif %}
+                                       class="form-checkbox-base"
+                                       onchange="toggleEndDate(this)">
+                                <label class="ml-2 text-sm text-slate-700">Currently working here</label>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-slate-700">Description</label>
+                                <textarea name="exp_description[{{ loop.index0 }}]" rows="3" 
+                                          class="form-textarea-base"
+                                          placeholder="Describe your responsibilities and achievements...">{{ exp.description or '' }}</textarea>
+                            </div>
                         </div>
                     </div>
+                    {% endfor %}
                 </div>
-                {% else %}
-                 {# Optionally show a message if no experiences exist yet #}
-                 {# <p class="text-slate-500 italic">No experiences added yet.</p> #}
-                {% endfor %}
+                <button type="button" class="add-field-btn" onclick="addExperience()">+ Add Experience</button>
             </div>
-            <button type="button" id="add-experience-btn" class="mt-6 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                + Adicionar Experiência
-            </button>
         </fieldset>
 
         <!-- Education Section -->
-        <fieldset class="border border-slate-300 p-6 rounded-md">
-            <legend class="text-xl font-semibold text-sky-600 px-2 mb-4">Educação</legend>
-            <div id="education-container" class="space-y-6">
-                {% for edu in data.education_entries %}
-                <div class="education-block border border-slate-200 p-4 rounded-md bg-slate-50 relative">
-                    <button type="button" onclick="removeBlock(this, 'education-block')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-xl px-2 py-0 leading-none rounded-full hover:bg-red-100 transition-colors" title="Remover Educação">×</button>
-                    <h3 class="text-lg font-medium text-slate-700 mb-3">Educação <span class="item-number">{{ loop.index }}</span></h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label for="edu_degree_{{loop.index0}}" class="block text-sm font-medium text-slate-700 mb-1">Escola/Universidade:</label>
-                            <input type="text" id="edu_degree_{{loop.index0}}" name="edu_degree[{{loop.index0}}]" value="{{ edu.degree | default('Universidade do Porto', true) }}" class="form-input-base" required>
-                        </div>
-                        <div>
-                            <label for="edu_institution_{{loop.index0}}" class="block text-sm font-medium text-slate-700 mb-1">Grau e Área de Estudo:</label>
-                            <input type="text" id="edu_institution_{{loop.index0}}" name="edu_institution[{{loop.index0}}]" value="{{ edu.institution | default('Licenciatura em Engenharia Informática', true) }}" class="form-input-base">
-                        </div>
-                        <div>
-                            <label for="edu_location_{{loop.index0}}" class="block text-sm font-medium text-slate-700 mb-1">Ano de Conclusão:</label>
-                            <input type="text" id="edu_location_{{loop.index0}}" name="edu_location[{{loop.index0}}]" value="{{ edu.edu_location | default('2015', true) }}" class="form-input-base">
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+        <fieldset class="field-group">
+            <legend class="text-lg font-semibold text-sky-700 mb-4">
+                Education
+                <input type="checkbox" class="field-visibility-toggle" checked onchange="toggleSectionVisibility(this, 'education-section')">
+                <span class="text-xs text-slate-500">Show/Hide Section</span>
+            </legend>
+            <div id="education-section">
+                <div id="education-container">
+                    {% for edu in data.education_entries %}
+                    <div class="field-group removable education-item" data-index="{{ loop.index0 }}">
+                        <button type="button" class="remove-field-btn" onclick="removeEducation(this)">×</button>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label for="edu_start_date_{{loop.index0}}" class="block text-sm font-medium text-slate-700 mb-1">Data de Início:</label>
-                                <input type="month" id="edu_start_date_{{loop.index0}}" name="edu_start_date[{{loop.index0}}]" value="{{ edu.start_date | default('', true) }}" class="form-input-base">
+                                <label class="block text-sm font-medium text-slate-700">Degree *</label>
+                                <input type="text" name="edu_degree[{{ loop.index0 }}]" 
+                                       value="{{ edu.degree or '' }}" 
+                                       class="form-input-base" required>
                             </div>
                             <div>
-                                <label for="edu_end_date_{{loop.index0}}" class="block text-sm font-medium text-slate-700 mb-1">Data de Término:</label>
-                                <input type="month" id="edu_end_date_{{loop.index0}}" name="edu_end_date[{{loop.index0}}]" value="{{ edu.end_date | default('', true) }}" class="form-input-base" {% if edu.is_present %}disabled{% endif %}>
+                                <label class="block text-sm font-medium text-slate-700">Institution *</label>
+                                <input type="text" name="edu_institution[{{ loop.index0 }}]" 
+                                       value="{{ edu.institution or '' }}" 
+                                       class="form-input-base" required>
                             </div>
-                            <div class="flex items-center mb-1 pt-6 md:pt-0 md:self-center"> <!-- Adjusted alignment -->
-                                <input type="checkbox" id="edu_present_{{loop.index0}}" name="edu_present[{{loop.index0}}]" class="form-checkbox-base h-5 w-5 text-sky-600 focus:ring-sky-500" onchange="toggleEndDate(this, 'edu_end_date_{{loop.index0}}')" {% if edu.is_present %}checked{% endif %}>
-                                <label for="edu_present_{{loop.index0}}" class="ml-2 text-sm text-slate-700">Atualmente matriculado</label>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700">Location</label>
+                                <input type="text" name="edu_location[{{ loop.index0 }}]" 
+                                       value="{{ edu.edu_location or '' }}" 
+                                       class="form-input-base">
                             </div>
-                        </div>
-                        <div>
-                            <label for="edu_details_{{loop.index0}}" class="block text-sm font-medium text-slate-700 mb-1">Detalhes (e.g., GPA, Honors, Relevant Coursework):</label>
-                            <textarea id="edu_details_{{loop.index0}}" name="edu_details[{{loop.index0}}]" rows="3" class="form-textarea-base min-h-[80px]">{{ edu.edu_details | default('', true) }}</textarea>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700">Start Date</label>
+                                <input type="month" name="edu_start_date[{{ loop.index0 }}]" 
+                                       value="{{ edu.start_date or '' }}" 
+                                       class="form-input-base">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700">End Date</label>
+                                <input type="month" name="edu_end_date[{{ loop.index0 }}]" 
+                                       value="{{ edu.end_date or '' }}" 
+                                       class="form-input-base"
+                                       {% if edu.is_present %}disabled{% endif %}>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" name="edu_present[{{ loop.index0 }}]" 
+                                       {% if edu.is_present %}checked{% endif %}
+                                       class="form-checkbox-base"
+                                       onchange="toggleEndDate(this)">
+                                <label class="ml-2 text-sm text-slate-700">Currently studying</label>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-slate-700">Details</label>
+                                <textarea name="edu_details[{{ loop.index0 }}]" rows="2" 
+                                          class="form-textarea-base"
+                                          placeholder="Additional details about your education...">{{ edu.edu_details or '' }}</textarea>
+                            </div>
                         </div>
                     </div>
+                    {% endfor %}
                 </div>
-                 {% else %}
-                  {# <p class="text-slate-500 italic">No education entries added yet.</p> #}
-                {% endfor %}
+                <button type="button" class="add-field-btn" onclick="addEducation()">+ Add Education</button>
             </div>
-            <button type="button" id="add-education-btn" class="mt-6 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                + Adicionar Educação
-            </button>
+        </fieldset>
+
+        <!-- Key Achievements Section -->
+        <fieldset class="field-group">
+            <legend class="text-lg font-semibold text-sky-700 mb-4">
+                Key Achievements
+                <input type="checkbox" class="field-visibility-toggle" checked onchange="toggleSectionVisibility(this, 'achievements-section')">
+                <span class="text-xs text-slate-500">Show/Hide Section</span>
+            </legend>
+            <div id="achievements-section">
+                <div id="achievements-container">
+                    {% for ach in data.key_achievements %}
+                    <div class="field-group removable achievement-item" data-index="{{ loop.index0 }}">
+                        <button type="button" class="remove-field-btn" onclick="removeAchievement(this)">×</button>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700">Achievement Title *</label>
+                                <input type="text" name="ach_title_{{ loop.index0 }}" 
+                                       value="{{ ach.title or '' }}" 
+                                       class="form-input-base" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700">Description</label>
+                                <textarea name="ach_description_{{ loop.index0 }}" rows="2" 
+                                          class="form-textarea-base"
+                                          placeholder="Describe your achievement...">{{ ach.description or '' }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="button" class="add-field-btn" onclick="addAchievement()">+ Add Achievement</button>
+            </div>
         </fieldset>
 
         <!-- Languages Section -->
-        <fieldset class="border border-slate-300 p-6 rounded-md">
-            <legend class="text-xl font-semibold text-sky-600 px-2 mb-4">Idiomas</legend>
-            <div id="languages-container" class="space-y-6">
-                {% for lang in data.languages %}
-                <div class="language-block border border-slate-200 p-4 rounded-md bg-slate-50 relative">
-                    <button type="button" onclick="removeBlock(this, 'language-block')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-xl px-2 py-0 leading-none rounded-full hover:bg-red-100 transition-colors" title="Remover Idioma">×</button>
-                    <h3 class="text-lg font-medium text-slate-700 mb-3">Idioma <span class="item-number">{{ loop.index }}</span></h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label for="lang_name_{{loop.index0}}" class="block text-sm font-medium text-slate-700 mb-1">Idioma:</label>
-                            <select id="lang_name_{{loop.index0}}" name="lang_name[{{loop.index0}}]" class="form-input-base">
-                                <option value="Português" {% if lang.name == 'Português' %}selected{% endif %}>Português</option>
-                                <option value="Inglês" {% if lang.name == 'Inglês' %}selected{% endif %}>Inglês</option>
-                                <option value="Espanhol" {% if lang.name == 'Espanhol' %}selected{% endif %}>Espanhol</option>
-                                <option value="Francês" {% if lang.name == 'Francês' %}selected{% endif %}>Francês</option>
-                                <option value="Alemão" {% if lang.name == 'Alemão' %}selected{% endif %}>Alemão</option>
-                                <!-- Add more languages as needed -->
-                            </select>
-                        </div>
-                        <div>
-                            <label for="lang_level_{{loop.index0}}" class="block text-sm font-medium text-slate-700 mb-1">Nível de Conversação:</label>
-                            <select id="lang_level_{{loop.index0}}" name="lang_level[{{loop.index0}}]" class="form-input-base">
-                                <option value="Fluente" {% if lang.level == 'Fluente' %}selected{% endif %}>Fluente</option>
-                                <option value="Avançado" {% if lang.level == 'Avançado' %}selected{% endif %}>Avançado</option>
-                                <option value="Intermediário" {% if lang.level == 'Intermediário' %}selected{% endif %}>Intermediário</option>
-                                <option value="Básico" {% if lang.level == 'Básico' %}selected{% endif %}>Básico</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="lang_reading_{{loop.index0}}" class="block text-sm font-medium text-slate-700 mb-1">Nível de Leitura:</label>
-                            <select id="lang_reading_{{loop.index0}}" name="lang_reading[{{loop.index0}}]" class="form-input-base">
-                                <option value="Fluente" {% if lang.reading == 'Fluente' %}selected{% endif %}>Fluente</option>
-                                <option value="Avançado" {% if lang.reading == 'Avançado' %}selected{% endif %}>Avançado</option>
-                                <option value="Intermediário" {% if lang.reading == 'Intermediário' %}selected{% endif %}>Intermediário</option>
-                                <option value="Básico" {% if lang.reading == 'Básico' %}selected{% endif %}>Básico</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="lang_writing_{{loop.index0}}" class="block text-sm font-medium text-slate-700 mb-1">Nível de Escrita:</label>
-                            <select id="lang_writing_{{loop.index0}}" name="lang_writing[{{loop.index0}}]" class="form-input-base">
-                                <option value="Fluente" {% if lang.writing == 'Fluente' %}selected{% endif %}>Fluente</option>
-                                <option value="Avançado" {% if lang.writing == 'Avançado' %}selected{% endif %}>Avançado</option>
-                                <option value="Intermediário" {% if lang.writing == 'Intermediário' %}selected{% endif %}>Intermediário</option>
-                                <option value="Básico" {% if lang.writing == 'Básico' %}selected{% endif %}>Básico</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                {% else %}
-                 {# <p class="text-slate-500 italic">No languages added yet.</p> #}
-                {% endfor %}
-            </div>
-            <button type="button" id="add-language-btn" class="mt-6 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                + Adicionar Idioma
-            </button>
-        </fieldset>
-
-        <!-- Additional Information Section -->
-        <fieldset class="border border-slate-300 p-6 rounded-md">
-            <legend class="text-xl font-semibold text-sky-600 px-2 mb-4">Informações Adicionais</legend>
-            <div id="additional-info-container" class="space-y-6">
-                {% for info in data.additional_info %}
-                <div class="info-block border border-slate-200 p-4 rounded-md bg-slate-50 relative">
-                    <button type="button" onclick="removeBlock(this, 'info-block')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-xl px-2 py-0 leading-none rounded-full hover:bg-red-100 transition-colors" title="Remover Informação">×</button>
-                    <h3 class="text-lg font-medium text-slate-700 mb-3">Informação <span class="item-number">{{ loop.index }}</span></h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label for="info_title_{{loop.index0}}" class="block text-sm font-medium text-slate-700 mb-1">Título:</label>
-                            <input type="text" id="info_title_{{loop.index0}}" name="info_title[{{loop.index0}}]" value="{{ info.title | default('', true) }}" class="form-input-base" required>
-                        </div>
-                        <div>
-                            <label for="info_description_{{loop.index0}}" class="block text-sm font-medium text-slate-700 mb-1">Descrição:</label>
-                            <textarea id="info_description_{{loop.index0}}" name="info_description[{{loop.index0}}]" rows="3" class="form-textarea-base min-h-[80px]">{{ info.description | default('', true) }}</textarea>
+        <fieldset class="field-group">
+            <legend class="text-lg font-semibold text-sky-700 mb-4">
+                Languages
+                <input type="checkbox" class="field-visibility-toggle" checked onchange="toggleSectionVisibility(this, 'languages-section')">
+                <span class="text-xs text-slate-500">Show/Hide Section</span>
+            </legend>
+            <div id="languages-section">
+                <div id="languages-container">
+                    {% for lang in data.languages %}
+                    <div class="field-group removable language-item" data-index="{{ loop.index0 }}">
+                        <button type="button" class="remove-field-btn" onclick="removeLanguage(this)">×</button>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700">Language *</label>
+                                <input type="text" name="lang_name[{{ loop.index0 }}]" 
+                                       value="{{ lang.name or '' }}" 
+                                       class="form-input-base" required
+                                       placeholder="e.g., English, Spanish, French">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700">Overall Level</label>
+                                <select name="lang_level[{{ loop.index0 }}]" class="form-input-base">
+                                    <option value="">Select level</option>
+                                    <option value="Beginner" {% if lang.level == 'Beginner' %}selected{% endif %}>Beginner</option>
+                                    <option value="Elementary" {% if lang.level == 'Elementary' %}selected{% endif %}>Elementary</option>
+                                    <option value="Intermediate" {% if lang.level == 'Intermediate' %}selected{% endif %}>Intermediate</option>
+                                    <option value="Upper Intermediate" {% if lang.level == 'Upper Intermediate' %}selected{% endif %}>Upper Intermediate</option>
+                                    <option value="Advanced" {% if lang.level == 'Advanced' %}selected{% endif %}>Advanced</option>
+                                    <option value="Native" {% if lang.level == 'Native' %}selected{% endif %}>Native</option>
+                                </select>
+                            </div>
+                            <div class="proficiency-grid">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-700">Reading</label>
+                                    <select name="lang_reading[{{ loop.index0 }}]" class="form-input-base text-sm">
+                                        <option value="">Select</option>
+                                        <option value="Basic" {% if lang.reading == 'Basic' %}selected{% endif %}>Basic</option>
+                                        <option value="Good" {% if lang.reading == 'Good' %}selected{% endif %}>Good</option>
+                                        <option value="Excellent" {% if lang.reading == 'Excellent' %}selected{% endif %}>Excellent</option>
+                                        <option value="Native" {% if lang.reading == 'Native' %}selected{% endif %}>Native</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-700">Writing</label>
+                                    <select name="lang_writing[{{ loop.index0 }}]" class="form-input-base text-sm">
+                                        <option value="">Select</option>
+                                        <option value="Basic" {% if lang.writing == 'Basic' %}selected{% endif %}>Basic</option>
+                                        <option value="Good" {% if lang.writing == 'Good' %}selected{% endif %}>Good</option>
+                                        <option value="Excellent" {% if lang.writing == 'Excellent' %}selected{% endif %}>Excellent</option>
+                                        <option value="Native" {% if lang.writing == 'Native' %}selected{% endif %}>Native</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-700">Speaking</label>
+                                    <select name="lang_speaking[{{ loop.index0 }}]" class="form-input-base text-sm">
+                                        <option value="">Select</option>
+                                        <option value="Basic" {% if lang.speaking == 'Basic' %}selected{% endif %}>Basic</option>
+                                        <option value="Good" {% if lang.speaking == 'Good' %}selected{% endif %}>Good</option>
+                                        <option value="Excellent" {% if lang.speaking == 'Excellent' %}selected{% endif %}>Excellent</option>
+                                        <option value="Native" {% if lang.speaking == 'Native' %}selected{% endif %}>Native</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    {% endfor %}
                 </div>
-                {% else %}
-                 {# <p class="text-slate-500 italic">No additional info added yet.</p> #}
-                {% endfor %}
+                <button type="button" class="add-field-btn" onclick="addLanguage()">+ Add Language</button>
             </div>
-            <button type="button" id="add-info-btn" class="mt-6 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                + Adicionar Informação
-            </button>
-        </fieldset>
-
-        <!-- References Section -->
-        <fieldset class="border border-slate-300 p-6 rounded-md">
-            <legend class="text-xl font-semibold text-sky-600 px-2 mb-4">Referências</legend>
-            <div id="references-container" class="space-y-6">
-                {% for ref in data.references %}
-                <div class="reference-block border border-slate-200 p-4 rounded-md bg-slate-50 relative">
-                    <button type="button" onclick="removeBlock(this, 'reference-block')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-xl px-2 py-0 leading-none rounded-full hover:bg-red-100 transition-colors" title="Remover Referência">×</button>
-                    <h3 class="text-lg font-medium text-slate-700 mb-3">Referência <span class="item-number">{{ loop.index }}</span></h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label for="ref_name_{{loop.index0}}" class="block text-sm font-medium text-slate-700 mb-1">Nome:</label>
-                            <input type="text" id="ref_name_{{loop.index0}}" name="ref_name[{{loop.index0}}]" value="{{ ref.name | default('Maria Santos', true) }}" class="form-input-base" required>
-                        </div>
-                        <div>
-                            <label for="ref_title_{{loop.index0}}" class="block text-sm font-medium text-slate-700 mb-1">Cargo:</label>
-                            <input type="text" id="ref_title_{{loop.index0}}" name="ref_title[{{loop.index0}}]" value="{{ ref.title | default('Gerente de Projetos, Tech Solutions Lda', true) }}" class="form-input-base">
-                        </div>
-                        <div>
-                            <label for="ref_phone_{{loop.index0}}" class="block text-sm font-medium text-slate-700 mb-1">Telefone:</label>
-                            <input type="tel" id="ref_phone_{{loop.index0}}" name="ref_phone[{{loop.index0}}]" value="{{ ref.phone | default('Disponível mediante solicitação', true) }}" class="form-input-base">
-                        </div>
-                        <div>
-                            <label for="ref_description_{{loop.index0}}" class="block text-sm font-medium text-slate-700 mb-1">Descrição:</label>
-                            <textarea id="ref_description_{{loop.index0}}" name="ref_description[{{loop.index0}}]" rows="3" class="form-textarea-base min-h-[80px]">{{ ref.description | default('', true) }}</textarea>
-                        </div>
-                    </div>
-                </div>
-                {% else %}
-                 {# <p class="text-slate-500 italic">No references added yet.</p> #}
-                {% endfor %}
-            </div>
-            <button type="button" id="add-reference-btn" class="mt-6 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                + Adicionar Referência
-            </button>
         </fieldset>
 
         <!-- Skills Section -->
-        <fieldset class="border border-slate-300 p-6 rounded-md">
-            <legend class="text-xl font-semibold text-sky-600 px-2 mb-4">Habilidades</legend>
-            <div class="space-y-4">
-                <div>
-                    <label for="skills" class="block text-sm font-medium text-slate-700 mb-1">Habilidades:</label>
-                    <textarea id="skills" name="skills" rows="4" class="form-textarea-base min-h-[80px]">{{ data.skills | default('PHP, Laravel, JavaScript, Vue.js, React, Node.js, HTML5, CSS3, Tailwind CSS, SQL (MySQL, PostgreSQL), NoSQL (MongoDB), Git, Docker, REST APIs, GraphQL, Testes Unitários (PHPUnit), Metodologias Ágeis (Scrum), Resolução de Problemas, Comunicação, Trabalho em Equipe', true) }}</textarea>
-                </div>
+        <fieldset class="field-group">
+            <legend class="text-lg font-semibold text-sky-700 mb-4">
+                Skills
+                <input type="checkbox" class="field-visibility-toggle" checked onchange="toggleSectionVisibility(this, 'skills-section')">
+                <span class="text-xs text-slate-500">Show/Hide Section</span>
+            </legend>
+            <div id="skills-section">
+                <label for="skills" class="block text-sm font-medium text-slate-700">Skills (comma-separated)</label>
+                <textarea id="skills" name="skills" rows="3" 
+                          class="form-textarea-base"
+                          placeholder="e.g., JavaScript, Python, Project Management, Leadership">{{ data.skills or '' }}</textarea>
             </div>
         </fieldset>
 
-        <div class="flex justify-end mt-10">
-            <button type="submit" class="px-6 py-3 bg-sky-600 text-white font-semibold rounded-md shadow-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                Próximo: Ordenar Seções →
+        <!-- Custom Fields Section -->
+        <fieldset class="field-group">
+            <legend class="text-lg font-semibold text-sky-700 mb-4">Custom Fields</legend>
+            <div id="custom-fields-container">
+                <!-- Custom fields will be added here dynamically -->
+            </div>
+            <button type="button" class="add-field-btn" onclick="addCustomField()">+ Add Custom Field</button>
+        </fieldset>
+
+        <!-- Submit Button -->
+        <div class="flex justify-center pt-6">
+            <button type="submit" 
+                    class="px-8 py-3 bg-sky-600 text-white font-semibold rounded-md shadow-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                Save & Continue to Section Ordering →
             </button>
         </div>
     </form>
 </div>
-
-<!-- Template for Achievement Block -->
-<template id="achievement-template">
-    <div class="achievement-block p-3 border border-slate-200 rounded-md bg-slate-50 relative">
-        <button type="button" onclick="removeBlock(this, 'achievement-block')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-xl px-2 py-0 leading-none rounded-full hover:bg-red-100 transition-colors" title="Remover Conquista">×</button>
-        <h4 class="text-md font-medium text-slate-600 mb-2">Conquista <span class="item-number"></span></h4>
-        <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Título:</label>
-            <input type="text" name="ach_title[]" class="form-input-base">
-        </div>
-        <div class="mt-3">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Descrição:</label>
-            <textarea name="ach_description[]" rows="2" class="form-textarea-base min-h-[60px]"></textarea>
-        </div>
-    </div>
-</template>
-
-<!-- Template for Course Block -->
-<template id="course-template">
-    <div class="course-block p-3 border border-slate-200 rounded-md bg-slate-50 relative">
-        <button type="button" onclick="removeBlock(this, 'course-block')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-xl px-2 py-0 leading-none rounded-full hover:bg-red-100 transition-colors" title="Remover Curso">×</button>
-        <h4 class="text-md font-medium text-slate-600 mb-2">Curso/Cert <span class="item-number"></span></h4>
-        <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Título do Curso/Certificado:</label>
-            <input type="text" name="course_title[]" class="form-input-base">
-        </div>
-        <div class="mt-3">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Descrição/Instituição:</label>
-            <textarea name="course_description[]" rows="2" class="form-textarea-base min-h-[60px]"></textarea>
-        </div>
-    </div>
-</template>
-
-<!-- Template for Experience Block -->
-<template id="experience-template">
-    <div class="experience-block border border-slate-200 p-4 rounded-md bg-slate-50 relative">
-        <button type="button" onclick="removeBlock(this, 'experience-block')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-xl px-2 py-0 leading-none rounded-full hover:bg-red-100 transition-colors" title="Remover Experiência">×</button>
-        <h3 class="text-lg font-medium text-slate-700 mb-3">Experiência <span class="item-number"></span></h3>
-        <div class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Nome da Empresa:</label>
-                <input type="text" name="exp_title[]" class="form-input-base" required>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Cargo:</label>
-                <input type="text" name="exp_company[]" class="form-input-base">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Localização:</label>
-                <input type="text" name="exp_location[]" class="form-input-base">
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Data de Início:</label>
-                    <input type="month" name="exp_start_date[]" class="form-input-base">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Data de Término:</label>
-                    <input type="month" name="exp_end_date[]" class="form-input-base">
-                </div>
-                <div class="flex items-center mb-1 pt-6 md:pt-0 md:self-center">
-                    <input type="checkbox" name="exp_present[]" class="form-checkbox-base h-5 w-5 text-sky-600 focus:ring-sky-500" onchange="toggleEndDate(this)">
-                    <label class="ml-2 text-sm text-slate-700">Atualmente trabalho aqui</label>
-                </div>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Descrição da Empresa:</label>
-                <textarea name="exp_description[]" rows="5" class="form-textarea-base min-h-[100px]" placeholder="- Liderou o desenvolvimento..."></textarea>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Principais Conquistas:</label>
-                <textarea name="exp_achievements[]" rows="5" class="form-textarea-base min-h-[100px]" placeholder="- Liderou o desenvolvimento..."></textarea>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Principais Responsabilidades:</label>
-                <textarea name="exp_responsibilities[]" rows="5" class="form-textarea-base min-h-[100px]" placeholder="- Desenvolvimento e manutenção..."></textarea>
-            </div>
-        </div>
-    </div>
-</template>
-
-<!-- Template for Education Block -->
-<template id="education-template">
-    <div class="education-block border border-slate-200 p-4 rounded-md bg-slate-50 relative">
-        <button type="button" onclick="removeBlock(this, 'education-block')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-xl px-2 py-0 leading-none rounded-full hover:bg-red-100 transition-colors" title="Remover Educação">×</button>
-        <h3 class="text-lg font-medium text-slate-700 mb-3">Educação <span class="item-number"></span></h3>
-        <div class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Escola/Universidade:</label>
-                <input type="text" name="edu_degree[]" class="form-input-base" required>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Grau e Área de Estudo:</label>
-                <input type="text" name="edu_institution[]" class="form-input-base">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Ano de Conclusão:</label>
-                <input type="text" name="edu_location[]" class="form-input-base">
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Data de Início:</label>
-                    <input type="month" name="edu_start_date[]" class="form-input-base">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Data de Término:</label>
-                    <input type="month" name="edu_end_date[]" class="form-input-base">
-                </div>
-                 <div class="flex items-center mb-1 pt-6 md:pt-0 md:self-center">
-                    <input type="checkbox" name="edu_present[]" class="form-checkbox-base h-5 w-5 text-sky-600 focus:ring-sky-500" onchange="toggleEndDate(this)">
-                    <label class="ml-2 text-sm text-slate-700">Atualmente matriculado</label>
-                </div>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Detalhes (e.g., GPA, Honors, Relevant Coursework):</label>
-                <textarea name="edu_details[]" rows="3" class="form-textarea-base min-h-[80px]"></textarea>
-            </div>
-        </div>
-    </div>
-</template>
-
-<!-- Template for Language Block -->
-<template id="language-template">
-    <div class="language-block border border-slate-200 p-4 rounded-md bg-slate-50 relative">
-        <button type="button" onclick="removeBlock(this, 'language-block')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-xl px-2 py-0 leading-none rounded-full hover:bg-red-100 transition-colors" title="Remover Idioma">×</button>
-        <h3 class="text-lg font-medium text-slate-700 mb-3">Idioma <span class="item-number"></span></h3>
-        <div class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Idioma:</label>
-                <select name="lang_name[]" class="form-input-base">
-                    <option value="Português">Português</option>
-                    <option value="Inglês">Inglês</option>
-                    <option value="Espanhol">Espanhol</option>
-                    <option value="Francês">Francês</option>
-                    <option value="Alemão">Alemão</option>
-                    <!-- Add more languages as needed -->
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Nível de Conversação:</label>
-                <select name="lang_level[]" class="form-input-base">
-                    <option value="Fluente">Fluente</option>
-                    <option value="Avançado">Avançado</option>
-                    <option value="Intermediário">Intermediário</option>
-                    <option value="Básico">Básico</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Nível de Leitura:</label>
-                <select name="lang_reading[]" class="form-input-base">
-                    <option value="Fluente">Fluente</option>
-                    <option value="Avançado">Avançado</option>
-                    <option value="Intermediário">Intermediário</option>
-                    <option value="Básico">Básico</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Nível de Escrita:</label>
-                <select name="lang_writing[]" class="form-input-base">
-                    <option value="Fluente">Fluente</option>
-                    <option value="Avançado">Avançado</option>
-                    <option value="Intermediário">Intermediário</option>
-                    <option value="Básico">Básico</option>
-                </select>
-            </div>
-        </div>
-    </div>
-</template>
-
-<!-- Template for Additional Info Block -->
-<template id="info-template">
-    <div class="info-block border border-slate-200 p-4 rounded-md bg-slate-50 relative">
-        <button type="button" onclick="removeBlock(this, 'info-block')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-xl px-2 py-0 leading-none rounded-full hover:bg-red-100 transition-colors" title="Remover Informação">×</button>
-        <h3 class="text-lg font-medium text-slate-700 mb-3">Informação <span class="item-number"></span></h3>
-        <div class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Título:</label>
-                <input type="text" name="info_title[]" class="form-input-base" required>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Descrição:</label>
-                <textarea name="info_description[]" rows="3" class="form-textarea-base min-h-[80px]"></textarea>
-            </div>
-        </div>
-    </div>
-</template>
-
-<!-- Template for Reference Block -->
-<template id="reference-template">
-    <div class="reference-block border border-slate-200 p-4 rounded-md bg-slate-50 relative">
-        <button type="button" onclick="removeBlock(this, 'reference-block')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-xl px-2 py-0 leading-none rounded-full hover:bg-red-100 transition-colors" title="Remover Referência">×</button>
-        <h3 class="text-lg font-medium text-slate-700 mb-3">Referência <span class="item-number"></span></h3>
-        <div class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Nome:</label>
-                <input type="text" name="ref_name[]" class="form-input-base" required>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Cargo:</label>
-                <input type="text" name="ref_title[]" class="form-input-base">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Telefone:</label>
-                <input type="tel" name="ref_phone[]" class="form-input-base">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Descrição:</label>
-                <textarea name="ref_description[]" rows="3" class="form-textarea-base min-h-[80px]"></textarea>
-            </div>
-        </div>
-    </div>
-</template>
 {% endblock %}
 
 {% block body_end_scripts %}
 <script>
-    // Keep track of the next index to use for dynamically added blocks
-    // Initialize based on the number of blocks rendered from server-side data
-    let achievementIndex = {{ data.key_achievements|length if data.key_achievements else 0 }};
-    let courseIndex = {{ data.courses|length if data.courses else 0 }};
-    let experienceIndex = {{ data.experiences|length if data.experiences else 0 }};
-    let educationIndex = {{ data.education_entries|length if data.education_entries else 0 }};
-    let languageIndex = {{ data.languages|length if data.languages else 0 }};
-    let infoIndex = {{ data.additional_info|length if data.additional_info else 0 }};
-    let referenceIndex = {{ data.references|length if data.references else 0 }};
+let experienceCount = {{ data.experiences|length if data.experiences else 0 }};
+let educationCount = {{ data.education_entries|length if data.education_entries else 0 }};
+let achievementCount = {{ data.key_achievements|length if data.key_achievements else 0 }};
+let languageCount = {{ data.languages|length if data.languages else 0 }};
+let customFieldCount = 0;
 
-    document.addEventListener('DOMContentLoaded', function () {
-        // Add initial block if none exist (for a completely new resume)
-        if (achievementIndex === 0 && document.getElementById('achievements-container').children.length === 0) {
-            addAchievementBlock(true); // Pass true for initial block logic
-        }
-        if (courseIndex === 0 && document.getElementById('courses-container').children.length === 0) {
-            addCourseBlock(true); // Pass true for initial block logic
-        }
-        if (experienceIndex === 0 && document.getElementById('experiences-container').children.length === 0) {
-            addExperienceBlock(true); // Pass true for initial block logic
-        }
-        if (educationIndex === 0 && document.getElementById('education-container').children.length === 0) {
-            addEducationBlock(true); // Pass true for initial block logic
-        }
-        if (languageIndex === 0 && document.getElementById('languages-container').children.length === 0) {
-            addLanguageBlock(true); // Pass true for initial block logic
-        }
-        if (infoIndex === 0 && document.getElementById('additional-info-container').children.length === 0) {
-            addInfoBlock(true); // Pass true for initial block logic
-        }
-        if (referenceIndex === 0 && document.getElementById('references-container').children.length === 0) {
-            addReferenceBlock(true); // Pass true for initial block logic
-        }
+function toggleFieldVisibility(checkbox, fieldId) {
+    const field = document.getElementById(fieldId);
+    if (checkbox.checked) {
+        field.classList.remove('hidden-field');
+        field.disabled = false;
+    } else {
+        field.classList.add('hidden-field');
+        field.disabled = true;
+    }
+}
 
-        // Add event listeners to buttons
-        document.getElementById('add-achievement-btn').addEventListener('click', () => addAchievementBlock(false));
-        document.getElementById('add-course-btn').addEventListener('click', () => addCourseBlock(false));
-        document.getElementById('add-experience-btn').addEventListener('click', () => addExperienceBlock(false));
-        document.getElementById('add-education-btn').addEventListener('click', () => addEducationBlock(false));
-        document.getElementById('add-language-btn').addEventListener('click', () => addLanguageBlock(false));
-        document.getElementById('add-info-btn').addEventListener('click', () => addInfoBlock(false));
-        document.getElementById('add-reference-btn').addEventListener('click', () => addReferenceBlock(false));
+function toggleSectionVisibility(checkbox, sectionId) {
+    const section = document.getElementById(sectionId);
+    if (checkbox.checked) {
+        section.style.display = 'block';
+    } else {
+        section.style.display = 'none';
+    }
+}
 
-        // Initialize "Present" checkboxes state for existing items loaded from data
-        initializePresentCheckboxes();
+function toggleEndDate(checkbox) {
+    const container = checkbox.closest('.field-group');
+    const endDateInput = container.querySelector('input[type="month"][name*="end_date"]');
+    if (checkbox.checked) {
+        endDateInput.disabled = true;
+        endDateInput.value = '';
+    } else {
+        endDateInput.disabled = false;
+    }
+}
+
+function addExperience() {
+    const container = document.getElementById('experience-container');
+    const newExperience = document.createElement('div');
+    newExperience.className = 'field-group removable experience-item';
+    newExperience.setAttribute('data-index', experienceCount);
+    
+    newExperience.innerHTML = `
+        <button type="button" class="remove-field-btn" onclick="removeExperience(this)">×</button>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Job Title *</label>
+                <input type="text" name="exp_title[${experienceCount}]" class="form-input-base" required>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Company *</label>
+                <input type="text" name="exp_company[${experienceCount}]" class="form-input-base" required>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Location</label>
+                <input type="text" name="exp_location[${experienceCount}]" class="form-input-base">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Start Date</label>
+                <input type="month" name="exp_start_date[${experienceCount}]" class="form-input-base">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700">End Date</label>
+                <input type="month" name="exp_end_date[${experienceCount}]" class="form-input-base">
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" name="exp_present[${experienceCount}]" class="form-checkbox-base" onchange="toggleEndDate(this)">
+                <label class="ml-2 text-sm text-slate-700">Currently working here</label>
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-slate-700">Description</label>
+                <textarea name="exp_description[${experienceCount}]" rows="3" class="form-textarea-base" placeholder="Describe your responsibilities and achievements..."></textarea>
+            </div>
+        </div>
+    `;
+    
+    container.appendChild(newExperience);
+    experienceCount++;
+}
+
+function removeExperience(button) {
+    button.closest('.experience-item').remove();
+}
+
+function addEducation() {
+    const container = document.getElementById('education-container');
+    const newEducation = document.createElement('div');
+    newEducation.className = 'field-group removable education-item';
+    newEducation.setAttribute('data-index', educationCount);
+    
+    newEducation.innerHTML = `
+        <button type="button" class="remove-field-btn" onclick="removeEducation(this)">×</button>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Degree *</label>
+                <input type="text" name="edu_degree[${educationCount}]" class="form-input-base" required>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Institution *</label>
+                <input type="text" name="edu_institution[${educationCount}]" class="form-input-base" required>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Location</label>
+                <input type="text" name="edu_location[${educationCount}]" class="form-input-base">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Start Date</label>
+                <input type="month" name="edu_start_date[${educationCount}]" class="form-input-base">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700">End Date</label>
+                <input type="month" name="edu_end_date[${educationCount}]" class="form-input-base">
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" name="edu_present[${educationCount}]" class="form-checkbox-base" onchange="toggleEndDate(this)">
+                <label class="ml-2 text-sm text-slate-700">Currently studying</label>
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-slate-700">Details</label>
+                <textarea name="edu_details[${educationCount}]" rows="2" class="form-textarea-base" placeholder="Additional details about your education..."></textarea>
+            </div>
+        </div>
+    `;
+    
+    container.appendChild(newEducation);
+    educationCount++;
+}
+
+function removeEducation(button) {
+    button.closest('.education-item').remove();
+}
+
+function addAchievement() {
+    const container = document.getElementById('achievements-container');
+    const newAchievement = document.createElement('div');
+    newAchievement.className = 'field-group removable achievement-item';
+    newAchievement.setAttribute('data-index', achievementCount);
+    
+    newAchievement.innerHTML = `
+        <button type="button" class="remove-field-btn" onclick="removeAchievement(this)">×</button>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Achievement Title *</label>
+                <input type="text" name="ach_title_${achievementCount}" class="form-input-base" required>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Description</label>
+                <textarea name="ach_description_${achievementCount}" rows="2" class="form-textarea-base" placeholder="Describe your achievement..."></textarea>
+            </div>
+        </div>
+    `;
+    
+    container.appendChild(newAchievement);
+    achievementCount++;
+}
+
+function removeAchievement(button) {
+    button.closest('.achievement-item').remove();
+}
+
+function addLanguage() {
+    const container = document.getElementById('languages-container');
+    const newLanguage = document.createElement('div');
+    newLanguage.className = 'field-group removable language-item';
+    newLanguage.setAttribute('data-index', languageCount);
+    
+    newLanguage.innerHTML = `
+        <button type="button" class="remove-field-btn" onclick="removeLanguage(this)">×</button>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Language *</label>
+                <input type="text" name="lang_name[${languageCount}]" class="form-input-base" required placeholder="e.g., English, Spanish, French">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Overall Level</label>
+                <select name="lang_level[${languageCount}]" class="form-input-base">
+                    <option value="">Select level</option>
+                    <option value="Beginner">Beginner</option>
+                    <option value="Elementary">Elementary</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Upper Intermediate">Upper Intermediate</option>
+                    <option value="Advanced">Advanced</option>
+                    <option value="Native">Native</option>
+                </select>
+            </div>
+            <div class="proficiency-grid">
+                <div>
+                    <label class="block text-xs font-medium text-slate-700">Reading</label>
+                    <select name="lang_reading[${languageCount}]" class="form-input-base text-sm">
+                        <option value="">Select</option>
+                        <option value="Basic">Basic</option>
+                        <option value="Good">Good</option>
+                        <option value="Excellent">Excellent</option>
+                        <option value="Native">Native</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-700">Writing</label>
+                    <select name="lang_writing[${languageCount}]" class="form-input-base text-sm">
+                        <option value="">Select</option>
+                        <option value="Basic">Basic</option>
+                        <option value="Good">Good</option>
+                        <option value="Excellent">Excellent</option>
+                        <option value="Native">Native</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-700">Speaking</label>
+                    <select name="lang_speaking[${languageCount}]" class="form-input-base text-sm">
+                        <option value="">Select</option>
+                        <option value="Basic">Basic</option>
+                        <option value="Good">Good</option>
+                        <option value="Excellent">Excellent</option>
+                        <option value="Native">Native</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.appendChild(newLanguage);
+    languageCount++;
+}
+
+function removeLanguage(button) {
+    button.closest('.language-item').remove();
+}
+
+function addCustomField() {
+    const container = document.getElementById('custom-fields-container');
+    const newField = document.createElement('div');
+    newField.className = 'field-group removable custom-field-item';
+    newField.setAttribute('data-index', customFieldCount);
+    
+    newField.innerHTML = `
+        <button type="button" class="remove-field-btn" onclick="removeCustomField(this)">×</button>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Field Title *</label>
+                <input type="text" name="custom_title_${customFieldCount}" class="form-input-base" required placeholder="e.g., Certifications, Awards, Projects">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Content</label>
+                <textarea name="custom_content_${customFieldCount}" rows="3" class="form-textarea-base" placeholder="Enter the content for this field..."></textarea>
+            </div>
+        </div>
+    `;
+    
+    container.appendChild(newField);
+    customFieldCount++;
+}
+
+function removeCustomField(button) {
+    button.closest('.custom-field-item').remove();
+}
+
+// Initialize form on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Set initial state for hidden fields
+    const hiddenToggles = document.querySelectorAll('.field-visibility-toggle:not(:checked)');
+    hiddenToggles.forEach(toggle => {
+        const fieldId = toggle.closest('label').getAttribute('for');
+        if (fieldId) {
+            toggleFieldVisibility(toggle, fieldId);
+        }
     });
-
-    // --- Dynamic Block Functions ---
-
-    function addAchievementBlock(isInitial = false) {
-        addDynamicBlock('achievement', isInitial);
-    }
-
-    function addCourseBlock(isInitial = false) {
-        addDynamicBlock('course', isInitial);
-    }
-
-    function addExperienceBlock(isInitial = false) {
-        addDynamicBlock('experience', isInitial);
-    }
-
-    function addEducationBlock(isInitial = false) {
-        addDynamicBlock('education', isInitial);
-    }
-
-    function addLanguageBlock(isInitial = false) {
-        addDynamicBlock('language', isInitial);
-    }
-
-    function addInfoBlock(isInitial = false) {
-        addDynamicBlock('info', isInitial);
-    }
-
-    function addReferenceBlock(isInitial = false) {
-        addDynamicBlock('reference', isInitial);
-    }
-
-    function addDynamicBlock(type, isInitial = false) {
-        const template = document.getElementById(`${type}-template`).content.cloneNode(true);
-        const newBlock = template.querySelector(`.${type}-block`);
-        const container = document.getElementById(`${type}s-container`); // e.g., experiences-container
-
-        // Determine current index and increment global counter
-        const currentIndex = (type === 'achievement') ? achievementIndex :
-                             (type === 'course') ? courseIndex :
-                             (type === 'experience') ? experienceIndex :
-                             (type === 'education') ? educationIndex :
-                             (type === 'language') ? languageIndex :
-                             (type === 'info') ? infoIndex :
-                             referenceIndex;
-
-        if (!isInitial || currentIndex === 0) { // Increment if adding new or first initial
-           if (type === 'achievement') achievementIndex++;
-           else if (type === 'course') courseIndex++;
-           else if (type === 'experience') experienceIndex++;
-           else if (type === 'education') educationIndex++;
-           else if (type === 'language') languageIndex++;
-           else if (type === 'info') infoIndex++;
-           else referenceIndex++;
-        }
-
-        // Update names and IDs in the cloned template
-        newBlock.querySelectorAll('input, textarea, label').forEach(el => {
-            const originalName = el.getAttribute('name');
-            const originalFor = el.getAttribute('for'); // Only relevant for labels
-
-            if (originalName) {
-                const newName = originalName.replace('[]', `[${currentIndex}]`);
-                el.name = newName;
-                // Generate a unique ID based on the new name
-                const newId = newName.replace(/[\[\]]/g, '_').replace(/_$/, `_${currentIndex}`);
-                el.id = newId; // Assign the new ID
-
-                 // Update label 'for' attribute to match the new input ID
-                const correspondingLabel = newBlock.querySelector(`label[for="${originalName.replace('[]', '')}"]`);
-                if (correspondingLabel) {
-                    correspondingLabel.htmlFor = newId;
-                }
-
-                // Set up 'onchange' for the 'present' checkbox specifically
-                if (el.type === 'checkbox' && originalName.includes('present')) {
-                    el.onchange = function() { toggleEndDate(this); };
-                }
-            } else if (originalFor && el.tagName === 'LABEL') {
-                 // If an input was found and ID set above, this label's 'for' might be auto-updated.
-                 // If not, try to find the input by the *new* name pattern and link 'for' to its ID.
-                const inputNameBase = originalFor.replace('[]', ''); // e.g., exp_title
-                const targetInput = newBlock.querySelector(`[name^="${inputNameBase}[${currentIndex}]"]`);
-                if (targetInput && targetInput.id) {
-                     el.htmlFor = targetInput.id;
-                }
-            }
-        });
-
-        // Update the item number display
-        newBlock.querySelector('.item-number').textContent = container.children.length + 1;
-
-        // Hide remove button only for the *very first initial* block added
-        if (isInitial && container.children.length === 0) {
-            const removeBtn = newBlock.querySelector('button[onclick*="removeBlock"]');
-            if(removeBtn) removeBtn.style.display = 'none';
-        }
-
-        container.appendChild(newBlock);
-    }
-
-    function removeBlock(button, blockClass) {
-        const blockToRemove = button.closest('.' + blockClass);
-        const container = blockToRemove ? blockToRemove.closest('#achievements-container, #courses-container, #experiences-container, #education-container, #languages-container, #additional-info-container, #references-container') : null;
-
-        if (blockToRemove && container) {
-            // Check if this is the last block (only applicable if we enforce at least one)
-            // For now, allow removing all blocks. Add check here if needed:
-            // if (container.querySelectorAll('.' + blockClass).length <= 1) {
-            //     alert("You must have at least one entry.");
-            //     return;
-            // }
-            blockToRemove.remove();
-            // Re-number remaining items
-            renumberItems(container, blockClass);
-        }
-    }
-
-    function renumberItems(container, blockClass) {
-         const remainingBlocks = container.querySelectorAll('.' + blockClass);
-         remainingBlocks.forEach((block, index) => {
-             const numberSpan = block.querySelector('.item-number');
-             if (numberSpan) numberSpan.textContent = index + 1;
-             // IMPORTANT: Renaming inputs/labels after removal is complex and error-prone.
-             // It's usually better to rely on the server-side handling potentially sparse indices
-             // (e.g., [0], [2] if [1] was removed). Flask's request.form handling should cope.
-             // If strict sequential indexing is required, you'd need a more robust re-indexing function here.
-         });
-    }
-
-    function toggleEndDate(checkboxElement, specificEndDateId = null) {
-        let endDateEl;
-        if (specificEndDateId) { // Used for initially rendered items with specific IDs
-             endDateEl = document.getElementById(specificEndDateId);
-        } else { // Used for dynamically added items (find within the same block)
-            const parentBlock = checkboxElement.closest('.experience-block, .education-block');
-            // Find the input whose name ends with 'end_date[...]' within the block
-            endDateEl = parentBlock ? parentBlock.querySelector('input[type="month"][name*="end_date"]') : null;
-        }
-
-        if (endDateEl) {
-            endDateEl.disabled = checkboxElement.checked;
-            if (checkboxElement.checked) {
-                endDateEl.value = ''; // Clear value when disabling
-            }
-        } else {
-            console.warn("Could not find corresponding end date element for checkbox:", checkboxElement);
-        }
-    }
-
-    function initializePresentCheckboxes() {
-        // Call toggleEndDate for all initially rendered checkboxes based on their checked state
-        document.querySelectorAll('input[type="checkbox"][name^="exp_present["], input[type="checkbox"][name^="edu_present["]').forEach(checkbox => {
-            // Find the corresponding end date ID (which includes the index)
-            const nameAttr = checkbox.getAttribute('name');
-            const indexMatch = nameAttr.match(/\[(\d+)\]/);
-            if (indexMatch) {
-                const index = indexMatch[1];
-                const idPrefix = nameAttr.startsWith('exp_') ? 'exp_end_date_' : 'edu_end_date_';
-                const endDateId = `${idPrefix}${index}`;
-                toggleEndDate(checkbox, endDateId); // Use the specific ID for initial setup
-            } else {
-                 console.warn("Could not extract index for checkbox:", checkbox);
-                 // Fallback attempt for dynamic items (shouldn't be needed on initial load)
-                 // toggleEndDate(checkbox);
-            }
-        });
-    }
-
+});
 </script>
 {% endblock %}
