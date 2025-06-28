@@ -1,305 +1,264 @@
 import io
 import os
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable, Image, Table, TableStyle
+from reportlab.platypus import BaseDocTemplate, PageTemplate, Frame, Paragraph, Spacer, Image, FrameBreak, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
-from reportlab.lib.colors import HexColor, black, gray, white
-from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_JUSTIFY
+from reportlab.lib.colors import HexColor, black, white, grey
+from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
+from reportlab.lib.pagesizes import letter
 from reportlab.lib.utils import ImageReader
+
+# --- Color Palette matching Elise Carter template ---
+COLOR_TEXT_MAIN = HexColor('#333333')
+COLOR_TEXT_MUTED = HexColor('#666666')
+COLOR_TEXT_HEADER = HexColor('#2c3e50')
+COLOR_ACCENT_GREEN = HexColor('#16a085')  # Teal/green accent
+COLOR_SECTION_GREEN = HexColor('#4CAF50')  # Green for section titles
+COLOR_BACKGROUND_LIGHT = HexColor('#f8f9fa')
+
+class EliseCarterDocTemplate(BaseDocTemplate):
+    def __init__(self, filename, **kwargs):
+        self.profile_image_path = kwargs.pop('profile_image_path', None)
+        BaseDocTemplate.__init__(self, filename, **kwargs)
+
+        # Define Frames: Main content (left), sidebar (right)
+        main_col_width = self.width * 0.65  # Main content takes 65%
+        sidebar_width = self.width * 0.30   # Sidebar takes 30%
+        gap = self.width - main_col_width - sidebar_width  # Small gap
+
+        # Main content frame (left side)
+        frame_main = Frame(self.leftMargin, self.bottomMargin,
+                           main_col_width, self.height, id='col_main', showBoundary=0,
+                           leftPadding=0, rightPadding=12, topPadding=0, bottomPadding=0)
+        
+        # Sidebar frame (right side)
+        frame_sidebar = Frame(self.leftMargin + main_col_width + gap, self.bottomMargin,
+                              sidebar_width, self.height, id='col_sidebar', showBoundary=0,
+                              leftPadding=12, rightPadding=0, topPadding=0, bottomPadding=0)
+        
+        main_page = PageTemplate(id='MainPageElise', frames=[frame_main, frame_sidebar], 
+                                onPage=self.draw_header_and_profile)
+        self.addPageTemplates([main_page])
+
+    def draw_header_and_profile(self, canvas, doc):
+        canvas.saveState()
+        
+        # Profile Image (Top Right in sidebar area)
+        if self.profile_image_path and os.path.exists(self.profile_image_path):
+            try:
+                img_size = 1.4 * inch
+                # Position in the top right of the sidebar
+                img_x = doc.leftMargin + (doc.width * 0.65) + (doc.width * 0.05) + (doc.width * 0.30)/2 - img_size/2
+                img_y = doc.height + doc.bottomMargin - img_size - (0.3 * inch)
+                
+                # Create circular clipping path
+                path = canvas.beginPath()
+                path.circle(img_x + img_size/2, img_y + img_size/2, img_size/2)
+                canvas.clipPath(path, stroke=0, fill=0)
+                canvas.drawImage(self.profile_image_path, img_x, img_y, 
+                               width=img_size, height=img_size, mask='auto')
+            except Exception as e:
+                print(f"Error drawing profile image: {e}")
+        
+        canvas.restoreState()
+
 
 def generate_pdf(data):
     buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter,
-                            rightMargin=0.75*inch, leftMargin=0.75*inch,
-                            topMargin=0.75*inch, bottomMargin=0.75*inch)
+    
+    doc = EliseCarterDocTemplate(buffer, pagesize=letter,
+                                 leftMargin=0.75*inch, rightMargin=0.75*inch,
+                                 topMargin=0.75*inch, bottomMargin=0.75*inch,
+                                 profile_image_path=data.get('profile_image_path'))
 
     styles = getSampleStyleSheet()
-
-    # --- Custom Styles based on the template image ---
-    styles.add(ParagraphStyle(name='NameHeader',
-                              fontName='Helvetica-Bold',
-                              fontSize=28,
-                              leading=32,
-                              alignment=TA_LEFT,
-                              textColor=HexColor('#2C3E50'),
-                              spaceAfter=0.05*inch))
-
-    styles.add(ParagraphStyle(name='TitleHeader',
-                              fontName='Helvetica',
-                              fontSize=14,
-                              leading=16,
-                              alignment=TA_LEFT,
-                              textColor=HexColor('#3498DB'),
-                              spaceAfter=0.1*inch))
-
-    styles.add(ParagraphStyle(name='ContactInfo',
-                              fontName='Helvetica',
-                              fontSize=10,
-                              leading=12,
-                              alignment=TA_LEFT,
-                              spaceAfter=0.2*inch))
-
-    styles.add(ParagraphStyle(name='SectionTitle',
-                              fontName='Helvetica-Bold',
-                              fontSize=12,
-                              leading=15,
-                              spaceBefore=0.2*inch,
-                              spaceAfter=0.1*inch,
-                              textColor=HexColor('#2C3E50'),
-                              textTransform='uppercase'))
-
-    styles.add(ParagraphStyle(name='JobTitle',
-                              fontName='Helvetica-Bold',
-                              fontSize=11,
-                              leading=14,
-                              textColor=HexColor('#2C3E50')))
-
-    styles.add(ParagraphStyle(name='CompanyInfo',
-                              fontName='Helvetica',
-                              fontSize=10,
-                              leading=12,
-                              textColor=HexColor('#3498DB'),
-                              spaceAfter=0.05*inch))
-
-    styles.add(ParagraphStyle(name='DateLocation',
-                              fontName='Helvetica',
-                              fontSize=9,
-                              leading=11,
-                              textColor=HexColor('#7F8C8D'),
-                              spaceAfter=0.05*inch))
-
-    styles.add(ParagraphStyle(name='BulletPoint',
-                              parent=styles['Normal'],
-                              leftIndent=0.25*inch,
-                              bulletIndent=0.1*inch,
-                              firstLineIndent=0,
-                              spaceBefore=0.03*inch,
-                              fontSize=10,
-                              leading=12))
-
-    styles.add(ParagraphStyle(name='NormalText',
-                              fontName='Helvetica',
-                              fontSize=10,
-                              leading=12,
-                              alignment=TA_JUSTIFY,
-                              spaceAfter=0.05*inch))
-
-    styles.add(ParagraphStyle(name='SkillItem',
-                              fontName='Helvetica',
-                              fontSize=10,
-                              leading=12,
-                              spaceAfter=0.03*inch))
-
-    styles.add(ParagraphStyle(name='CertificationTitle',
-                              fontName='Helvetica-Bold',
-                              fontSize=10,
-                              leading=12,
-                              textColor=HexColor('#3498DB')))
-
-    styles.add(ParagraphStyle(name='CertificationDesc',
-                              fontName='Helvetica',
-                              fontSize=9,
-                              leading=11,
-                              spaceAfter=0.1*inch))
-
-    story = []
-
-    # --- Header with Photo ---
-    header_data = []
     
-    # Left side: Name, title, contact info
-    left_content = []
+    # --- Define Styles matching Elise Carter template ---
+    styles.add(ParagraphStyle(name='FullName', fontName='Helvetica-Bold', fontSize=28, 
+                              textColor=COLOR_TEXT_HEADER, spaceBefore=0, leading=32, alignment=TA_LEFT))
+    styles.add(ParagraphStyle(name='JobTitleHeader', fontName='Helvetica', fontSize=12, 
+                              textColor=COLOR_TEXT_MAIN, spaceAfter=6, leading=15))
+    styles.add(ParagraphStyle(name='ContactInfo', fontName='Helvetica', fontSize=9, 
+                              textColor=COLOR_TEXT_MUTED, leading=12, spaceAfter=0.15*inch))
+
+    # Main content styles
+    styles.add(ParagraphStyle(name='MainSectionTitle', fontName='Helvetica-Bold', fontSize=11, 
+                              textColor=COLOR_SECTION_GREEN, spaceBefore=0.2*inch, spaceAfter=0.08*inch, 
+                              leading=13, alignment=TA_LEFT, textTransform='uppercase'))
+    styles.add(ParagraphStyle(name='MainBodyText', fontName='Helvetica', fontSize=10, 
+                              textColor=COLOR_TEXT_MAIN, leading=14, spaceAfter=4, alignment=TA_JUSTIFY))
+    styles.add(ParagraphStyle(name='ExpJobTitle', fontName='Helvetica-Bold', fontSize=12, 
+                              textColor=COLOR_TEXT_MAIN, leading=15, spaceAfter=2))
+    styles.add(ParagraphStyle(name='ExpCompanyDate', fontName='Helvetica', fontSize=10, 
+                              textColor=COLOR_TEXT_MUTED, leading=13, spaceAfter=4))
+    styles.add(ParagraphStyle(name='ExpBullet', fontName='Helvetica', fontSize=10, 
+                              textColor=COLOR_TEXT_MAIN, leading=13, leftIndent=15, 
+                              firstLineIndent=0, spaceBefore=2, bulletIndent=5))
+    styles.add(ParagraphStyle(name='EduDegree', fontName='Helvetica-Bold', fontSize=11, 
+                              textColor=COLOR_TEXT_MAIN, leading=14, spaceAfter=2))
+    styles.add(ParagraphStyle(name='EduInstitutionDate', fontName='Helvetica', fontSize=10, 
+                              textColor=COLOR_TEXT_MUTED, leading=13, spaceAfter=4))
+
+    # Sidebar styles
+    styles.add(ParagraphStyle(name='SidebarSectionTitle', fontName='Helvetica-Bold', fontSize=10, 
+                              textColor=COLOR_SECTION_GREEN, spaceBefore=0.25*inch, spaceAfter=0.1*inch, 
+                              leading=12, textTransform='uppercase'))
+    styles.add(ParagraphStyle(name='SidebarItemTitle', fontName='Helvetica-Bold', fontSize=10, 
+                              textColor=COLOR_TEXT_MAIN, leading=13, spaceAfter=2))
+    styles.add(ParagraphStyle(name='SidebarItemDesc', fontName='Helvetica', fontSize=9, 
+                              textColor=COLOR_TEXT_MUTED, leading=12, spaceAfter=0.12*inch))
+    styles.add(ParagraphStyle(name='SidebarSkill', fontName='Helvetica', fontSize=9, 
+                              textColor=COLOR_TEXT_MAIN, leading=12, spaceAfter=3))
+
+    # --- Story for Main Column (Left) ---
+    story_main = []
+    
+    # Header section (Name, Title, Contact)
     if data.get('full_name'):
-        left_content.append(Paragraph(data['full_name'].upper(), styles['NameHeader']))
-    
+        story_main.append(Paragraph(data['full_name'].upper(), styles['FullName']))
     if data.get('title_subtitle'):
-        left_content.append(Paragraph(data['title_subtitle'], styles['TitleHeader']))
+        story_main.append(Paragraph(data['title_subtitle'], styles['JobTitleHeader']))
     
-    # Contact information with icons
     contact_items = []
-    if data.get('phone'): contact_items.append(f"📞 {data['phone']}")
-    if data.get('email'): contact_items.append(f"✉ {data['email']}")
+    if data.get('email'): contact_items.append(f"@ {data['email']}")
     if data.get('linkedin'): contact_items.append(f"🔗 {data['linkedin']}")
     if data.get('location'): contact_items.append(f"📍 {data['location']}")
-    
     if contact_items:
-        left_content.append(Paragraph(" | ".join(contact_items), styles['ContactInfo']))
+        story_main.append(Paragraph("  ".join(contact_items), styles['ContactInfo']))
+    
+    story_main.append(Spacer(1, 0.2*inch))
 
-    # Right side: Profile photo
-    photo_content = []
-    profile_image_path = data.get('profile_image_path')
-    if profile_image_path and os.path.exists(profile_image_path):
-        try:
-            # Create circular profile image
-            img = Image(profile_image_path, width=1.5*inch, height=1.5*inch)
-            photo_content.append(img)
-        except Exception as e:
-            print(f"Error loading profile image: {e}")
-            # Add placeholder if image fails to load
-            photo_content.append(Paragraph("Photo", styles['ContactInfo']))
-    else:
-        # Add placeholder if no image provided
-        photo_content.append(Paragraph("", styles['ContactInfo']))
+    # Get section order from data
+    section_order = data.get('section_order', ['summary', 'experience', 'education'])
 
-    # Create header table
-    if photo_content and photo_content[0]:
-        header_data.append([left_content, photo_content[0]])
-        header_table = Table(header_data, colWidths=[5.5*inch, 1.5*inch])
-        header_table.setStyle(TableStyle([
-            ('VALIGN', (0,0), (-1,-1), 'TOP'),
-            ('ALIGN', (1,0), (1,0), 'CENTER'),
-            ('LEFTPADDING', (0,0), (-1,-1), 0),
-            ('RIGHTPADDING', (0,0), (-1,-1), 0),
-            ('TOPPADDING', (0,0), (-1,-1), 0),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 0),
-        ]))
-        story.append(header_table)
-    else:
-        # If no photo, just add the left content
-        story.extend(left_content)
-
-    story.append(HRFlowable(width="100%", thickness=1, color=HexColor('#BDC3C7'), 
-                           spaceBefore=0.1*inch, spaceAfter=0.2*inch))
-
-    # Get section order from data, with fallback to default
-    section_order = data.get('section_order', ['summary', 'experience', 'education', 'achievements', 'courses', 'skills', 'languages'])
-
-    # Process sections in the specified order
     for section_key in section_order:
         if section_key == 'summary':
             if data.get('summary'):
-                story.append(Paragraph("SUMMARY", styles['SectionTitle']))
-                story.append(Paragraph(data['summary'], styles['NormalText']))
-                story.append(Spacer(1, 0.1*inch))
+                story_main.append(Paragraph('SUMMARY', styles['MainSectionTitle']))
+                story_main.append(Paragraph(data['summary'], styles['MainBodyText']))
+                story_main.append(Spacer(1, 0.15*inch))
 
         elif section_key == 'experience':
             experiences = data.get('experiences', [])
             if experiences:
-                story.append(Paragraph("EXPERIENCE", styles['SectionTitle']))
+                story_main.append(Paragraph('EXPERIENCE', styles['MainSectionTitle']))
                 for exp in experiences:
-                    if exp.get('title') and exp.get('company'):
-                        story.append(Paragraph(exp['title'], styles['JobTitle']))
-                        story.append(Paragraph(exp['company'], styles['CompanyInfo']))
-                        
-                        # Date and location line
-                        date_location = []
-                        if exp.get('start_date'):
-                            date_str = exp['start_date']
-                            if exp.get('end_date'):
-                                date_str += f" - {exp['end_date']}"
-                            elif exp.get('is_present'):
-                                date_str += " - Present"
-                            date_location.append(f"📅 {date_str}")
-                        
-                        if exp.get('location'):
-                            date_location.append(f"📍 {exp['location']}")
-                        
-                        if date_location:
-                            story.append(Paragraph(" | ".join(date_location), styles['DateLocation']))
-                        
-                        if exp.get('description'):
-                            desc_lines = exp['description'].split('\n')
-                            for line in desc_lines:
-                                line = line.strip()
-                                if line.startswith(('-', '*', '•')):
-                                    story.append(Paragraph(f"• {line[1:].strip()}", styles['BulletPoint']))
-                                elif line:
-                                    story.append(Paragraph(line, styles['NormalText']))
-                        story.append(Spacer(1, 0.15*inch))
+                    if exp.get('title'):
+                        story_main.append(Paragraph(exp['title'], styles['ExpJobTitle']))
+                    
+                    # Company and dates line
+                    company_date_parts = []
+                    if exp.get('company'):
+                        company_date_parts.append(exp['company'])
+                    
+                    # Format dates
+                    if exp.get('start_date'):
+                        date_str = exp['start_date']
+                        if exp.get('end_date'):
+                            date_str += f" - {exp['end_date']}"
+                        elif exp.get('is_present'):
+                            date_str += " - Present"
+                        company_date_parts.append(f"📅 {date_str}")
+                    
+                    if exp.get('location'):
+                        company_date_parts.append(f"📍 {exp['location']}")
+                    
+                    if company_date_parts:
+                        story_main.append(Paragraph("  ".join(company_date_parts), styles['ExpCompanyDate']))
+                    
+                    # Description with bullet points
+                    if exp.get('description'):
+                        desc_lines = exp['description'].split('\n')
+                        for line in desc_lines:
+                            line = line.strip()
+                            if line:
+                                story_main.append(Paragraph(f"• {line}", styles['ExpBullet']))
+                    
+                    story_main.append(Spacer(1, 0.15*inch))
 
         elif section_key == 'education':
             education_entries = data.get('education_entries', [])
             if education_entries:
-                story.append(Paragraph("EDUCATION", styles['SectionTitle']))
+                story_main.append(Paragraph('EDUCATION', styles['MainSectionTitle']))
                 for edu in education_entries:
-                    if edu.get('degree') and edu.get('institution'):
-                        story.append(Paragraph(edu['degree'], styles['JobTitle']))
-                        story.append(Paragraph(edu['institution'], styles['CompanyInfo']))
-                        
-                        # Date and location line
-                        date_location = []
-                        if edu.get('start_date'):
-                            date_str = edu['start_date']
-                            if edu.get('end_date'):
-                                date_str += f" - {edu['end_date']}"
-                            elif edu.get('is_present'):
-                                date_str += " - Present"
-                            date_location.append(f"📅 {date_str}")
-                        
-                        if edu.get('edu_location'):
-                            date_location.append(f"📍 {edu['edu_location']}")
-                        
-                        if date_location:
-                            story.append(Paragraph(" | ".join(date_location), styles['DateLocation']))
-                        
-                        if edu.get('edu_details'):
-                            story.append(Paragraph(edu['edu_details'], styles['NormalText']))
-                        story.append(Spacer(1, 0.1*inch))
+                    if edu.get('degree'):
+                        story_main.append(Paragraph(edu['degree'], styles['EduDegree']))
+                    
+                    # Institution and dates
+                    edu_parts = []
+                    if edu.get('institution'):
+                        edu_parts.append(edu['institution'])
+                    
+                    if edu.get('start_date'):
+                        date_str = edu['start_date']
+                        if edu.get('end_date'):
+                            date_str += f" - {edu['end_date']}"
+                        elif edu.get('is_present'):
+                            date_str += " - Present"
+                        edu_parts.append(date_str)
+                    
+                    if edu.get('edu_location'):
+                        edu_parts.append(edu['edu_location'])
+                    
+                    if edu_parts:
+                        story_main.append(Paragraph("  ".join(edu_parts), styles['EduInstitutionDate']))
+                    
+                    if edu.get('edu_details'):
+                        story_main.append(Paragraph(edu['edu_details'], styles['MainBodyText']))
+                    
+                    story_main.append(Spacer(1, 0.1*inch))
 
-        elif section_key == 'skills':
-            if data.get('skills'):
-                story.append(Paragraph("SKILLS", styles['SectionTitle']))
-                
-                # Create skills in a more organized layout
-                skills_list = [skill.strip() for skill in data['skills'].split(',')]
-                
-                # Group skills into categories if possible, or just list them
-                for skill in skills_list:
-                    if skill:
-                        story.append(Paragraph(skill, styles['SkillItem']))
-                story.append(Spacer(1, 0.1*inch))
+    # --- Story for Sidebar (Right) ---
+    story_sidebar = []
+    
+    # Add spacer to clear profile image area
+    story_sidebar.append(Spacer(1, 1.8 * inch))
 
-        elif section_key == 'achievements':
-            key_achievements = data.get('key_achievements', [])
-            if key_achievements:
-                story.append(Paragraph("KEY ACHIEVEMENTS", styles['SectionTitle']))
-                for achievement in key_achievements:
-                    if achievement.get('title'):
-                        story.append(Paragraph(f"🏆 {achievement['title']}", styles['JobTitle']))
-                        if achievement.get('description'):
-                            story.append(Paragraph(achievement['description'], styles['NormalText']))
-                        story.append(Spacer(1, 0.05*inch))
+    # STRENGTHS/KEY ACHIEVEMENTS
+    key_achievements = data.get('key_achievements', [])
+    if key_achievements:
+        story_sidebar.append(Paragraph('STRENGTHS', styles['SidebarSectionTitle']))
+        for ach in key_achievements:
+            if ach.get('title'):
+                story_sidebar.append(Paragraph(ach['title'], styles['SidebarItemTitle']))
+                if ach.get('description'):
+                    story_sidebar.append(Paragraph(ach['description'], styles['SidebarItemDesc']))
 
-        elif section_key == 'courses':
-            courses = data.get('courses', [])
-            if courses:
-                story.append(Paragraph("CERTIFICATION", styles['SectionTitle']))
-                for course in courses:
-                    if course.get('title'):
-                        story.append(Paragraph(course['title'], styles['CertificationTitle']))
-                        if course.get('description'):
-                            story.append(Paragraph(course['description'], styles['CertificationDesc']))
+    # SKILLS
+    if data.get('skills'):
+        story_sidebar.append(Paragraph('SKILLS', styles['SidebarSectionTitle']))
+        skills_list = [skill.strip() for skill in data['skills'].split(',')]
+        
+        # Group skills in a clean layout
+        for skill in skills_list:
+            if skill:
+                story_sidebar.append(Paragraph(skill, styles['SidebarSkill']))
+        story_sidebar.append(Spacer(1, 0.15*inch))
 
-        elif section_key == 'languages':
-            languages = data.get('languages', [])
-            if languages:
-                story.append(Paragraph("LANGUAGES", styles['SectionTitle']))
-                
-                # Create language table similar to the template
-                lang_data = [["Language", "Level", "●●●●●"]]  # Header with dots representation
-                
-                for lang in languages:
-                    if lang.get('name'):
-                        level = lang.get('level', 'Conversational')
-                        # Create dots based on level
-                        dots = "●●●●●" if level == "Native" else "●●●●○" if level == "Advanced" else "●●●○○"
-                        lang_data.append([lang['name'], level, dots])
-                
-                if len(lang_data) > 1:  # If we have languages beyond header
-                    lang_table = Table(lang_data, colWidths=[1.5*inch, 1.5*inch, 1*inch])
-                    lang_table.setStyle(TableStyle([
-                        ('BACKGROUND', (0, 0), (-1, 0), HexColor('#F8F9FA')),
-                        ('TEXTCOLOR', (0, 0), (-1, 0), HexColor('#2C3E50')),
-                        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-                        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                        ('FONTSIZE', (0, 0), (-1, -1), 10),
-                        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-                        ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#BDC3C7'))
-                    ]))
-                    story.append(lang_table)
-                    story.append(Spacer(1, 0.1*inch))
+    # PROJECTS
+    projects = data.get('projects', [])
+    if projects:
+        story_sidebar.append(Paragraph('PROJECTS', styles['SidebarSectionTitle']))
+        for proj in projects:
+            if proj.get('title'):
+                story_sidebar.append(Paragraph(proj['title'], styles['SidebarItemTitle']))
+                if proj.get('description'):
+                    story_sidebar.append(Paragraph(proj['description'], styles['SidebarItemDesc']))
 
-    doc.build(story)
+    # HOW I SPLIT MY TIME (if available in data)
+    if data.get('hobbies'):
+        story_sidebar.append(Paragraph('PASSIONS', styles['SidebarSectionTitle']))
+        hobbies_list = [hobby.strip() for hobby in data['hobbies'].split(',')]
+        for hobby in hobbies_list:
+            if hobby:
+                story_sidebar.append(Paragraph(hobby, styles['SidebarSkill']))
+
+    # --- Combine Stories for Build ---
+    full_story = []
+    full_story.extend(story_main)
+    full_story.append(FrameBreak())  # Move to the sidebar frame
+    full_story.extend(story_sidebar)
+
+    doc.build(full_story)
     buffer.seek(0)
     return buffer
