@@ -88,6 +88,27 @@
         gap: 0.5rem;
         margin-top: 0.5rem;
     }
+
+    .photo-upload-area {
+        border: 2px dashed #cbd5e1;
+        border-radius: 0.5rem;
+        padding: 2rem;
+        text-align: center;
+        background-color: #f8fafc;
+        transition: border-color 0.3s ease;
+    }
+
+    .photo-upload-area:hover {
+        border-color: #3b82f6;
+    }
+
+    .photo-preview {
+        max-width: 150px;
+        max-height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #e2e8f0;
+    }
 </style>
 {% endblock %}
 
@@ -96,7 +117,7 @@
     <h1 class="text-3xl font-bold text-center text-sky-700 mb-6">{{ title }}</h1>
     <p class="text-center text-slate-600 mb-8">Fill out your resume information below. Fields marked with * are required.</p>
 
-    <form method="POST" action="{{ url_for('resume_form') }}" class="space-y-8">
+    <form method="POST" action="{{ url_for('resume_form') }}" class="space-y-8" enctype="multipart/form-data">
         
         <!-- Personal Information Section -->
         <fieldset class="field-group">
@@ -221,6 +242,39 @@
                            value="{{ data.address or '' }}" 
                            class="form-input-base hidden-field">
                 </div>
+            </div>
+        </fieldset>
+
+        <!-- Photo Upload Section -->
+        <fieldset class="field-group">
+            <legend class="text-lg font-semibold text-sky-700 mb-4">
+                Profile Photo (Optional)
+                <input type="checkbox" class="field-visibility-toggle" onchange="toggleSectionVisibility(this, 'photo-section')">
+                <span class="text-xs text-slate-500">Show/Hide Section</span>
+            </legend>
+            <div id="photo-section" style="display: none;">
+                <div class="photo-upload-area">
+                    <div id="photo-preview-container" style="display: none;">
+                        <img id="photo-preview" class="photo-preview mx-auto mb-4" src="" alt="Profile Preview">
+                        <button type="button" onclick="removePhoto()" class="text-red-600 hover:text-red-800 text-sm">Remove Photo</button>
+                    </div>
+                    <div id="photo-upload-prompt">
+                        <svg class="mx-auto h-12 w-12 text-slate-400 mb-4" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <p class="text-slate-600 mb-2">Upload a profile photo</p>
+                        <p class="text-xs text-slate-500 mb-4">JPG, PNG up to 5MB</p>
+                        <input type="file" id="profile_photo" name="profile_photo" 
+                               accept="image/*" 
+                               class="hidden" 
+                               onchange="previewPhoto(this)">
+                        <button type="button" onclick="document.getElementById('profile_photo').click()" 
+                                class="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 transition-colors">
+                            Choose Photo
+                        </button>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-500 mt-2">Note: Photos are only used in select templates (like Template 6). Most templates don't include photos.</p>
             </div>
         </fieldset>
 
@@ -546,6 +600,35 @@ function toggleEndDate(checkbox) {
     } else {
         endDateInput.disabled = false;
     }
+}
+
+function previewPhoto(input) {
+    const file = input.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('photo-preview');
+            const previewContainer = document.getElementById('photo-preview-container');
+            const uploadPrompt = document.getElementById('photo-upload-prompt');
+            
+            preview.src = e.target.result;
+            previewContainer.style.display = 'block';
+            uploadPrompt.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function removePhoto() {
+    const input = document.getElementById('profile_photo');
+    const preview = document.getElementById('photo-preview');
+    const previewContainer = document.getElementById('photo-preview-container');
+    const uploadPrompt = document.getElementById('photo-upload-prompt');
+    
+    input.value = '';
+    preview.src = '';
+    previewContainer.style.display = 'none';
+    uploadPrompt.style.display = 'block';
 }
 
 function addExperience() {

@@ -52,7 +52,7 @@ AVAILABLE_TEMPLATES = {
     # Add placeholders for other templates shown in the image (6-20)
     # You would need to add actual generator functions and preview images for these
     # Assuming they also have a generate_pdf function in their respective files
-     "template_6": { "name": "Template 6", "generator": template_6.generate_pdf, "preview_image": "images/modern_preview.png" },
+     "template_6": { "name": "Template 6 (With Photo)", "generator": template_6.generate_pdf, "preview_image": "images/modern_preview.png" },
      "template_7": { "name": "Template 7", "generator": template_7.generate_pdf, "preview_image": "images/modern_preview.png" },
      "template_8": { "name": "Template 8", "generator": template_8.generate_pdf, "preview_image": "images/modern_preview.png" },
      "template_9": { "name": "Template 9", "generator": template_9.generate_pdf, "preview_image": "images/modern_preview.png" },
