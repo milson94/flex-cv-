@@ -41,24 +41,35 @@ class EliseCarterDocTemplate(BaseDocTemplate):
         self.addPageTemplates([main_page])
 
     def draw_header_and_profile(self, canvas, doc):
+        """Draw the profile image in the top-right corner"""
         canvas.saveState()
         
-        # Profile Image (Top Right in sidebar area)
+        # Profile Image (Top Right corner of the page)
         if self.profile_image_path and os.path.exists(self.profile_image_path):
             try:
-                img_size = 1.4 * inch
-                # Position in the top right of the sidebar
-                img_x = doc.leftMargin + (doc.width * 0.65) + (doc.width * 0.05) + (doc.width * 0.30)/2 - img_size/2
-                img_y = doc.height + doc.bottomMargin - img_size - (0.3 * inch)
+                img_size = 1.5 * inch
+                # Position in the absolute top-right corner
+                img_x = doc.pagesize[0] - doc.rightMargin - img_size - 0.1*inch
+                img_y = doc.pagesize[1] - doc.topMargin - img_size - 0.1*inch
                 
                 # Create circular clipping path
+                center_x = img_x + img_size/2
+                center_y = img_y + img_size/2
+                radius = img_size/2
+                
                 path = canvas.beginPath()
-                path.circle(img_x + img_size/2, img_y + img_size/2, img_size/2)
+                path.circle(center_x, center_y, radius)
                 canvas.clipPath(path, stroke=0, fill=0)
+                
+                # Draw the image
                 canvas.drawImage(self.profile_image_path, img_x, img_y, 
                                width=img_size, height=img_size, mask='auto')
+                
             except Exception as e:
                 print(f"Error drawing profile image: {e}")
+                # Draw a placeholder circle if image fails
+                canvas.setFillColor(HexColor('#E0E0E0'))
+                canvas.circle(center_x, center_y, radius, stroke=1, fill=1)
         
         canvas.restoreState()
 
@@ -208,6 +219,28 @@ def generate_pdf(data):
                     
                     story_main.append(Spacer(1, 0.1*inch))
 
+        elif section_key == 'achievements':
+            key_achievements = data.get('key_achievements', [])
+            if key_achievements:
+                story_main.append(Paragraph('KEY ACHIEVEMENTS', styles['MainSectionTitle']))
+                for ach in key_achievements:
+                    if ach.get('title'):
+                        story_main.append(Paragraph(f"🏆 {ach['title']}", styles['ExpJobTitle']))
+                        if ach.get('description'):
+                            story_main.append(Paragraph(ach['description'], styles['MainBodyText']))
+                        story_main.append(Spacer(1, 0.1*inch))
+
+        elif section_key == 'courses':
+            courses = data.get('courses', [])
+            if courses:
+                story_main.append(Paragraph('COURSES', styles['MainSectionTitle']))
+                for course in courses:
+                    if course.get('title'):
+                        story_main.append(Paragraph(course['title'], styles['ExpJobTitle']))
+                        if course.get('description'):
+                            story_main.append(Paragraph(course['description'], styles['MainBodyText']))
+                        story_main.append(Spacer(1, 0.1*inch))
+
     # --- Story for Sidebar (Right) ---
     story_sidebar = []
     
@@ -245,13 +278,22 @@ def generate_pdf(data):
                 if proj.get('description'):
                     story_sidebar.append(Paragraph(proj['description'], styles['SidebarItemDesc']))
 
-    # HOW I SPLIT MY TIME (if available in data)
+    # LANGUAGES
+    languages = data.get('languages', [])
+    if languages:
+        story_sidebar.append(Paragraph('LANGUAGES', styles['SidebarSectionTitle']))
+        for lang in languages:
+            if lang.get('name'):
+                level = lang.get('level', 'Conversational')
+                story_sidebar.append(Paragraph(f"{lang['name']}: {level}", styles['SidebarSkill']))
+
+    # HOW I SPLIT MY TIME / PASSIONS
     if data.get('hobbies'):
         story_sidebar.append(Paragraph('PASSIONS', styles['SidebarSectionTitle']))
         hobbies_list = [hobby.strip() for hobby in data['hobbies'].split(',')]
         for hobby in hobbies_list:
             if hobby:
-                story_sidebar.append(Paragraph(hobby, styles['SidebarSkill']))
+                story_sidebar.append(Paragraph(f"⭐ {hobby}", styles['SidebarSkill']))
 
     # --- Combine Stories for Build ---
     full_story = []
