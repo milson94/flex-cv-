@@ -89,7 +89,7 @@ SAMPLE_RESUME_DATA = {
 
     'key_achievements': [
         {'title': 'Implemented Supplier Performance Management System', 'description': 'Successfully introduced a systematic approach to evaluating and improving supplier performance, elevating efficiency by 10%.'},
-        {'title': 'Managed $500M Indirect Spend Portfolio', 'description': 'Directed strategic allocation and cost-saving initiatives across diverse departments, optimizing the company's substantial indirect spend.'},
+        {'title': 'Managed $500M Indirect Spend Portfolio', 'description': 'Directed strategic allocation and cost-saving initiatives across diverse departments, optimizing the company\'s substantial indirect spend.'},
         {'title': 'Achieved 15% Annual Cost Savings', 'description': 'Strategized and executed a category management plan for medical supplies that slashed annual costs significantly.'}
     ],
     'courses': [
@@ -308,7 +308,7 @@ def resume_form():
                 break
             resume_data['additional_info'].append({
                 'title': request.form[info_title_key].strip(),
-                'description': request.form.get(f'info_description[{i}', '').strip()
+                'description': request.form.get(f'info_description[{i}]', '').strip()
             })
             i += 1
 
